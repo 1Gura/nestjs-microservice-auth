@@ -6,15 +6,15 @@ import {
   USERS_SERVICE_NAME,
   UsersServiceClient,
 } from '@app/common';
-import { AuthService } from '../../../auth/src/auth.service';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ReplaySubject } from 'rxjs';
+import { AUTH_SERVICE } from './constants';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
   private usersServiceClient: UsersServiceClient;
 
-  constructor(@Inject(AuthService) private client: ClientGrpc) {}
+  constructor(@Inject(AUTH_SERVICE) private client: ClientGrpc) {}
 
   onModuleInit() {
     this.usersServiceClient =
@@ -55,6 +55,7 @@ export class UsersService implements OnModuleInit {
 
     this.usersServiceClient.queryUsers(users$).subscribe((users) => {
       console.log('CHUNK: ', chunkNumber);
+      console.log('USERS: ', users);
       chunkNumber++;
     });
   }
