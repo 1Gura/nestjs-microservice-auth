@@ -1,26 +1,89 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  CreateUserDto,
+  PaginationDto,
+  UpdateUserDto,
+  User,
+  Users,
+} from '@app/common';
+import { Observable, Subject } from 'rxjs';
+import { randomUUID } from 'crypto';
 
 @Injectable()
-export class UsersService {
-  create(createUserDto: CreateUserDto): string {
-    return `This action adds a new user ${createUserDto}`;
+export class UsersService implements OnModuleInit {
+  private readonly users: User[] = [];
+
+  onModuleInit() {
+    for (let i = 0; i < 100; i++) {
+      this.create({ username: randomUUID(), password: randomUUID(), age: 0 });
+    }
   }
 
-  findAll(): string {
-    return `This action returns all users`;
+  create(createUserDto: CreateUserDto): User {
+    const user: User = {
+      ...createUserDto,
+      subscribed: false,
+      socialMedia: { fbUri: undefined, twitterUri: undefined },
+      id: randomUUID(),
+    };
+
+    this.users.push(user);
+
+    return user;
   }
 
-  findOne(id: number): string {
-    return `This action returns a #${id} user`;
+  findAll(): Users {
+    return { users: this.users };
   }
 
-  update(id: number, updateUserDto: UpdateUserDto): string {
-    return `This action updates a #${id} user, ${updateUserDto}`;
+  findOne(id: string): User {
+    return this.users.find((user) => user.id === id);
   }
 
-  remove(id: number): string {
-    return `This action removes a #${id} user`;
+  update(id: string, updateUserDto: UpdateUserDto): User {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+
+    if (userIndex !== -1) {
+      this.users[userIndex] = {
+        ...this.users[userIndex],
+        ...updateUserDto,
+      };
+
+      return this.users[userIndex];
+    }
+
+    throw new NotFoundException(`User not found by ${id}`);
+  }
+
+  remove(id: string): User {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+
+    if (userIndex !== -1) {
+      return this.users.splice(userIndex)[0];
+    }
+
+    throw new NotFoundException(`User not found by ${id}`);
+  }
+
+  queryUsers(
+    paginationDtoStream: Observable<PaginationDto>,
+  ): Observable<Users> {
+    const subject = new Subject<Users>();
+
+    const onNext = (paginationDto: PaginationDto) => {
+      const start = paginationDto.page * paginationDto.skip;
+      subject.next({
+        users: this.users.slice(start, start + paginationDto.skip),
+      });
+    };
+
+    const onComplete = () => subject.complete();
+
+    paginationDtoStream.subscribe({
+      next: onNext,
+      complete: onComplete,
+    });
+
+    return subject.asObservable();
   }
 }
