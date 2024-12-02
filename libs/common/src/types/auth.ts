@@ -5,6 +5,8 @@
 // source: proto/auth.proto
 
 /* eslint-disable */
+
+// TODO вынести типы в отдельную либу и шарить все это между клиентом и сервером ИЛИ посмотреть в сторону NX и сделать монорепу
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
