@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package auth;
+
+// Сообщение для отправки данных для логина
+message LoginRequest {
+  string username = 1;  // Имя пользователя
+  string password = 2;  // Пароль пользователя
+}
+
+// Сообщение для ответа на запрос логина
+message LoginResponse {
+  string token = 1;  // Токен для аутентификации (JWT или другой)
+  string refresh_token = 2;  // Рефреш-токен для обновления доступа
+  bool success = 3;  // Успешность логина
+  string message = 4;  // Сообщение об ошибке или успехе
+}
+
+// Сообщение для регистрации нового пользователя
+message RegisterRequest {
+  string username = 1;  // Имя пользователя
+  string password = 2;  // Пароль
+  string email = 3;     // Электронная почта
+}
+
+// Ответ на запрос регистрации
+message RegisterResponse {
+  bool success = 1;     // Успешность регистрации
+  string message = 2;   // Сообщение об ошибке или успехе
+}
+
+// Сообщение для проверки токена
+message CheckTokenRequest {
+  string token = 1;  // Токен для проверки
+}
+
+// Ответ на запрос проверки токена
+message CheckTokenResponse {
+  bool valid = 1;     // Является ли токен действительным
+  string message = 2; // Сообщение о статусе токена
+}
+
+// Сообщение для запроса на выход (logout)
+message LogoutRequest {
+  string token = 1;  // Токен, который нужно отозвать
+}
+
+// Ответ на запрос выхода
+message LogoutResponse {
+  bool success = 1;   // Успешность выхода
+  string message = 2; // Сообщение
+}
+
+// Сообщение для изменения пароля
+message ChangePasswordRequest {
+  string username = 1;   // Имя пользователя
+  string old_password = 2;  // Старый пароль
+  string new_password = 3;  // Новый пароль
+}
+
+// Ответ на запрос изменения пароля
+message ChangePasswordResponse {
+  bool success = 1;   // Успешность изменения пароля
+  string message = 2; // Сообщение
+}
+
+// Сообщение для получения данных пользователя
+message UserInfoRequest {
+  string username = 1;  // Имя пользователя
+}
+
+// Ответ на запрос получения информации о пользователе
+message UserInfoResponse {
+  string username = 1;  // Имя пользователя
+  string email = 2;     // Электронная почта
+  string created_at = 3; // Дата создания аккаунта
+}
+
+// Сервис аутентификации и авторизации
+service AuthService {
+  // Метод для логина
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  // Метод для регистрации
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+
+  // Метод для проверки токена
+  rpc CheckToken(CheckTokenRequest) returns (CheckTokenResponse);
+
+  // Метод для выхода из системы
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+
+  // Метод для изменения пароля
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+
+  // Метод для получения информации о пользователе
+  rpc UserInfo(UserInfoRequest) returns (UserInfoResponse);
+}

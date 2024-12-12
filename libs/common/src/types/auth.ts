@@ -5,97 +5,186 @@
 // source: proto/auth.proto
 
 /* eslint-disable */
-
-// TODO вынести типы в отдельную либу и шарить все это между клиентом и сервером ИЛИ посмотреть в сторону NX и сделать монорепу
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
-export const protobufPackage = "auth";
+export const authProtobufPackage  = "auth";
 
-export interface Empty {
-}
-
-export interface PaginationDto {
-  page: number;
-  skip: number;
-}
-
-export interface FindOneUserDto {
-  id: string;
-}
-
-export interface UpdateUserDto {
-  id: string;
-  socialMedia: SocialMedia | undefined;
-}
-
-export interface Users {
-  users: User[];
-}
-
-export interface CreateUserDto {
+/** Сообщение для отправки данных для логина */
+export interface LoginRequest {
+  /** Имя пользователя */
   username: string;
+  /** Пароль пользователя */
   password: string;
-  age: number;
 }
 
-export interface User {
-  id: string;
+/** Сообщение для ответа на запрос логина */
+export interface LoginResponse {
+  /** Токен для аутентификации (JWT или другой) */
+  token: string;
+  /** Рефреш-токен для обновления доступа */
+  refreshToken: string;
+  /** Успешность логина */
+  success: boolean;
+  /** Сообщение об ошибке или успехе */
+  message: string;
+}
+
+/** Сообщение для регистрации нового пользователя */
+export interface RegisterRequest {
+  /** Имя пользователя */
   username: string;
+  /** Пароль */
   password: string;
-  age: number;
-  subscribed: boolean;
-  socialMedia: SocialMedia | undefined;
+  /** Электронная почта */
+  email: string;
 }
 
-export interface SocialMedia {
-  twitterUri?: string | undefined;
-  fbUri?: string | undefined;
+/** Ответ на запрос регистрации */
+export interface RegisterResponse {
+  /** Успешность регистрации */
+  success: boolean;
+  /** Сообщение об ошибке или успехе */
+  message: string;
+}
+
+/** Сообщение для проверки токена */
+export interface CheckTokenRequest {
+  /** Токен для проверки */
+  token: string;
+}
+
+/** Ответ на запрос проверки токена */
+export interface CheckTokenResponse {
+  /** Является ли токен действительным */
+  valid: boolean;
+  /** Сообщение о статусе токена */
+  message: string;
+}
+
+/** Сообщение для запроса на выход (logout) */
+export interface LogoutRequest {
+  /** Токен, который нужно отозвать */
+  token: string;
+}
+
+/** Ответ на запрос выхода */
+export interface LogoutResponse {
+  /** Успешность выхода */
+  success: boolean;
+  /** Сообщение */
+  message: string;
+}
+
+/** Сообщение для изменения пароля */
+export interface ChangePasswordRequest {
+  /** Имя пользователя */
+  username: string;
+  /** Старый пароль */
+  oldPassword: string;
+  /** Новый пароль */
+  newPassword: string;
+}
+
+/** Ответ на запрос изменения пароля */
+export interface ChangePasswordResponse {
+  /** Успешность изменения пароля */
+  success: boolean;
+  /** Сообщение */
+  message: string;
+}
+
+/** Сообщение для получения данных пользователя */
+export interface UserInfoRequest {
+  /** Имя пользователя */
+  username: string;
+}
+
+/** Ответ на запрос получения информации о пользователе */
+export interface UserInfoResponse {
+  /** Имя пользователя */
+  username: string;
+  /** Электронная почта */
+  email: string;
+  /** Дата создания аккаунта */
+  createdAt: string;
 }
 
 export const AUTH_PACKAGE_NAME = "auth";
 
-export interface UsersServiceClient {
-  createUser(request: CreateUserDto): Observable<User>;
+/** Сервис аутентификации и авторизации */
 
-  findAllUsers(request: Empty): Observable<Users>;
+export interface AuthServiceClient {
+  /** Метод для логина */
 
-  findOneUser(request: FindOneUserDto): Observable<User>;
+  login(request: LoginRequest): Observable<LoginResponse>;
 
-  updateUser(request: UpdateUserDto): Observable<User>;
+  /** Метод для регистрации */
 
-  removeUser(request: FindOneUserDto): Observable<User>;
+  register(request: RegisterRequest): Observable<RegisterResponse>;
 
-  queryUsers(request: Observable<PaginationDto>): Observable<Users>;
+  /** Метод для проверки токена */
+
+  checkToken(request: CheckTokenRequest): Observable<CheckTokenResponse>;
+
+  /** Метод для выхода из системы */
+
+  logout(request: LogoutRequest): Observable<LogoutResponse>;
+
+  /** Метод для изменения пароля */
+
+  changePassword(request: ChangePasswordRequest): Observable<ChangePasswordResponse>;
+
+  /** Метод для получения информации о пользователе */
+
+  userInfo(request: UserInfoRequest): Observable<UserInfoResponse>;
 }
 
-export interface UsersServiceController {
-  createUser(request: CreateUserDto): Promise<User> | Observable<User> | User;
+/** Сервис аутентификации и авторизации */
 
-  findAllUsers(request: Empty): Promise<Users> | Observable<Users> | Users;
+export interface AuthServiceController {
+  /** Метод для логина */
 
-  findOneUser(request: FindOneUserDto): Promise<User> | Observable<User> | User;
+  login(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
 
-  updateUser(request: UpdateUserDto): Promise<User> | Observable<User> | User;
+  /** Метод для регистрации */
 
-  removeUser(request: FindOneUserDto): Promise<User> | Observable<User> | User;
+  register(request: RegisterRequest): Promise<RegisterResponse> | Observable<RegisterResponse> | RegisterResponse;
 
-  queryUsers(request: Observable<PaginationDto>): Observable<Users>;
+  /** Метод для проверки токена */
+
+  checkToken(
+    request: CheckTokenRequest,
+  ): Promise<CheckTokenResponse> | Observable<CheckTokenResponse> | CheckTokenResponse;
+
+  /** Метод для выхода из системы */
+
+  logout(request: LogoutRequest): Promise<LogoutResponse> | Observable<LogoutResponse> | LogoutResponse;
+
+  /** Метод для изменения пароля */
+
+  changePassword(
+    request: ChangePasswordRequest,
+  ): Promise<ChangePasswordResponse> | Observable<ChangePasswordResponse> | ChangePasswordResponse;
+
+  /** Метод для получения информации о пользователе */
+
+  userInfo(request: UserInfoRequest): Promise<UserInfoResponse> | Observable<UserInfoResponse> | UserInfoResponse;
 }
 
-export function UsersServiceControllerMethods() {
+export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createUser", "findAllUsers", "findOneUser", "updateUser", "removeUser"];
+    const grpcMethods: string[] = ["login", "register", "checkToken", "logout", "changePassword", "userInfo"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("UsersService", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
     }
-    const grpcStreamMethods: string[] = ["queryUsers"];
+    const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("UsersService", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const USERS_SERVICE_NAME = "UsersService";
+export const AUTH_SERVICE_NAME = "AuthService";
