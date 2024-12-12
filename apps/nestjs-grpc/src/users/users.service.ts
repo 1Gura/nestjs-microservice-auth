@@ -8,13 +8,13 @@ import {
 } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { ReplaySubject } from 'rxjs';
-import { AUTH_SERVICE } from './constants';
+import { USER_SERVICE } from './constants';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
   private usersServiceClient: UsersServiceClient;
 
-  constructor(@Inject(AUTH_SERVICE) private client: ClientGrpc) {}
+  constructor(@Inject(USER_SERVICE) private client: ClientGrpc) {}
 
   onModuleInit() {
     this.usersServiceClient =
