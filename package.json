@@ -11,6 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:dev:users": "nest start --watch users",
+    "start:dev:auth": "nest start --watch auth",
     "start:dev:nestjs-grpc": "nest start --watch nestjs-grpc",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/nestjs-grpc/main",
