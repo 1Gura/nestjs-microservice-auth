@@ -1,13 +1,21 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterRequest } from '@app/common';
+import { LoginRequest, RegisterRequest, RegisterResponse } from '@app/common';
+import { Observable } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  register(@Body() createAuthDto: RegisterRequest) {
-    return this.authService.create(createAuthDto);
+  @Post('/register')
+  register(
+    @Body() registerRequest: RegisterRequest,
+  ): Observable<RegisterResponse> {
+    return this.authService.register(registerRequest);
+  }
+
+  @Post('/login')
+  login(@Body() loginRequest: LoginRequest): Observable<RegisterResponse> {
+    return this.authService.login(loginRequest);
   }
 }
