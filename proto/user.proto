@@ -19,7 +19,8 @@ message PaginationDto {
 }
 
 message FindOneUserDto {
-  string id = 1;
+  optional string id = 1;
+  optional string email = 2;
 }
 
 message UpdateUserDto {

@@ -1,18 +1,38 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  postgres:
+  auth-db:
     image: postgres:15
-    container_name: auth_postgres
-    restart: always
+    container_name: auth-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
       POSTGRES_DB: auth_db
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Пробрасываем порт на хосте для авторизации
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - postgres-network
+
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    environment:
+      POSTGRES_USER: user_user
+      POSTGRES_PASSWORD: user_password
+      POSTGRES_DB: user_db
+    ports:
+      - "5434:5432"  # Пробрасываем порт на хосте для работы с пользователями
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - postgres-network
 
 volumes:
-  postgres_data:
+  auth-db-data:
+  user-db-data:
+
+networks:
+  postgres-network:
+    driver: bridge
