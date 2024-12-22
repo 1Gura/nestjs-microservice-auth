@@ -1,12 +1,5 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import {
-  CreateUserDto,
-  PaginationDto,
-  UpdateUserDto,
-  User,
-  Users,
-} from '@app/common';
-import { Observable, Subject } from 'rxjs';
+import { CreateUserDto, UpdateUserDto, User, Users } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as Entities from './db/entities/index';
@@ -77,27 +70,5 @@ export class UsersService implements OnModuleInit {
     }
 
     throw new NotFoundException(`User not found by ${id}`);
-  }
-
-  queryUsers(
-    paginationDtoStream: Observable<PaginationDto>,
-  ): Observable<Users> {
-    const subject = new Subject<Users>();
-
-    const onNext = (paginationDto: PaginationDto) => {
-      const start = paginationDto.page * paginationDto.skip;
-      subject.next({
-        users: this.users.slice(start, start + paginationDto.skip),
-      });
-    };
-
-    const onComplete = () => subject.complete();
-
-    paginationDtoStream.subscribe({
-      next: onNext,
-      complete: onComplete,
-    });
-
-    return subject.asObservable();
   }
 }

@@ -11,7 +11,6 @@ export class AuthController {
   register(
     @Body() registerRequest: RegisterRequest,
   ): Observable<RegisterResponse> {
-    console.log('asdasdasdasdasdasd');
     return this.authService.register(registerRequest);
   }
 

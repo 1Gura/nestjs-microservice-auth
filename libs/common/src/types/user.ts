@@ -13,11 +13,6 @@ export const protobufPackage = "user";
 export interface Empty {
 }
 
-export interface PaginationDto {
-  page: number;
-  skip: number;
-}
-
 export interface FindOneUserDto {
   id?: string | undefined;
   email?: string | undefined;
@@ -66,8 +61,6 @@ export interface UsersServiceClient {
   updateUser(request: UpdateUserDto): Observable<User>;
 
   removeUser(request: FindOneUserDto): Observable<User>;
-
-  queryUsers(request: Observable<PaginationDto>): Observable<Users>;
 }
 
 export interface UsersServiceController {
@@ -80,8 +73,6 @@ export interface UsersServiceController {
   updateUser(request: UpdateUserDto): Promise<User> | Observable<User> | User;
 
   removeUser(request: FindOneUserDto): Promise<User> | Observable<User> | User;
-
-  queryUsers(request: Observable<PaginationDto>): Observable<Users>;
 }
 
 export function UsersServiceControllerMethods() {
@@ -91,7 +82,7 @@ export function UsersServiceControllerMethods() {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UsersService", method)(constructor.prototype[method], method, descriptor);
     }
-    const grpcStreamMethods: string[] = ["queryUsers"];
+    const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcStreamMethod("UsersService", method)(constructor.prototype[method], method, descriptor);

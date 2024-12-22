@@ -1,13 +1,11 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   CreateUserDto,
-  PaginationDto,
   UpdateUserDto,
   USERS_SERVICE_NAME,
   UsersServiceClient,
 } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ReplaySubject } from 'rxjs';
 import { USER_SERVICE } from '../constants';
 
 @Injectable()
@@ -26,6 +24,7 @@ export class UsersService implements OnModuleInit {
   }
 
   findAll() {
+    console.log(this.usersServiceClient);
     return this.usersServiceClient.findAllUsers({});
   }
 
@@ -39,24 +38,5 @@ export class UsersService implements OnModuleInit {
 
   remove(id: string) {
     return this.usersServiceClient.removeUser({ id });
-  }
-
-  emailUsers() {
-    const users$ = new ReplaySubject<PaginationDto>();
-
-    users$.next({ page: 0, skip: 25 });
-    users$.next({ page: 1, skip: 25 });
-    users$.next({ page: 2, skip: 25 });
-    users$.next({ page: 3, skip: 25 });
-
-    users$.complete();
-
-    let chunkNumber = 1;
-
-    this.usersServiceClient.queryUsers(users$).subscribe((users) => {
-      console.log('CHUNK: ', chunkNumber);
-      console.log('USERS: ', users);
-      chunkNumber++;
-    });
   }
 }

@@ -3,12 +3,10 @@ import { UsersService } from './users.service';
 import {
   CreateUserDto,
   FindOneUserDto,
-  PaginationDto,
   UpdateUserDto,
   UsersServiceController,
   UsersServiceControllerMethods,
 } from '@app/common';
-import { Observable } from 'rxjs';
 
 @Controller()
 @UsersServiceControllerMethods()
@@ -18,7 +16,6 @@ export class UsersController implements UsersServiceController {
   createUser(createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
-
   findAllUsers() {
     return this.usersService.findAll();
   }
@@ -33,9 +30,5 @@ export class UsersController implements UsersServiceController {
 
   removeUser(findOneUserDto: FindOneUserDto) {
     return this.usersService.remove(findOneUserDto.id);
-  }
-
-  queryUsers(paginationDtoStream: Observable<PaginationDto>) {
-    return this.usersService.queryUsers(paginationDtoStream);
   }
 }
