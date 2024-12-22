@@ -1,22 +1,16 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './db/entities';
+import { DatabaseModule } from './db/database.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5434,
-      username: 'user_user',
-      password: 'user_password',
-      database: 'user_db',
-      entities: [User], // Укажите сущности
-      synchronize: true, // Автоматическое создание таблиц, для разработки удобно, но не рекомендуется на продакшене
+    ConfigModule.forRoot({
+      isGlobal: true, // Переменные окружения будут глобально доступны
+      envFilePath: '.env', // Укажите путь к вашему .env файлу
     }),
-    TypeOrmModule.forFeature([User]), // Подключите сущности
+    DatabaseModule, // Ваш модуль базы данных
   ],
   controllers: [UsersController],
   providers: [UsersService],

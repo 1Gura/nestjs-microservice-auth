@@ -1,26 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User } from './entities';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: '../../.env', // Укажи путь к `.env` для микросервиса
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5434,
+      username: 'user_user',
+      password: 'user_password',
+      database: 'user_db',
+      entities: [User], // Укажите сущности
+      synchronize: true, // Автоматическое создание таблиц, для разработки удобно, но не рекомендуется на продакшене
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: 'postgres',
-        port: 5432,
-        username: 'postgres',
-        password: '1234',
-        database: 'users_db',
-        autoLoadEntities: true,
-        synchronize: true, // Выключить в продакшене!
-      }),
-    }),
+    TypeOrmModule.forFeature([User]), // Подключите сущности
   ],
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}
