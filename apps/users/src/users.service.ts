@@ -7,7 +7,6 @@ import {
   Users,
 } from '@app/common';
 import { Observable, Subject } from 'rxjs';
-import { randomUUID } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as Entities from './db/entities/index';
@@ -21,25 +20,28 @@ export class UsersService implements OnModuleInit {
     private readonly userRepository: Repository<Entities.User>,
   ) {}
 
-  onModuleInit() {
-    for (let i = 0; i < 100; i++) {
-      this.create({ username: randomUUID(), password: randomUUID(), age: 0 });
-    }
-  }
+  onModuleInit() {}
 
   async findByEmail(email: string): Promise<Entities.User | null> {
     return await this.userRepository.findOne({ where: { email } });
   }
 
-  create(createUserDto: CreateUserDto): User {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const user: User = {
       ...createUserDto,
+      id: '',
       subscribed: false,
       socialMedia: { fbUri: undefined, twitterUri: undefined },
-      id: randomUUID(),
     };
 
-    this.users.push(user);
+    const newUser = this.userRepository.create({
+      email: user.email,
+      password: user.password,
+    });
+
+    await this.userRepository.save(newUser);
+
+    user.id = `${newUser.id}`;
 
     return user;
   }

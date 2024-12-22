@@ -2,9 +2,23 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { USER_SERVICE } from '../../nestjs-grpc/src/constants';
+import { USER_PACKAGE_NAME } from '@app/common';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ClientsModule.register([
+      {
+        name: USER_SERVICE,
+        transport: Transport.GRPC,
+        options: {
+          package: USER_PACKAGE_NAME,
+          protoPath: join(__dirname, '../user.proto'),
+        },
+      },
+    ]),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

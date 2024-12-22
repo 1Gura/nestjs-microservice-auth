@@ -36,6 +36,7 @@ export interface CreateUserDto {
   username: string;
   password: string;
   age: number;
+  email: string;
 }
 
 export interface User {
@@ -45,6 +46,7 @@ export interface User {
   age: number;
   subscribed: boolean;
   socialMedia: SocialMedia | undefined;
+  email: string;
 }
 
 export interface SocialMedia {
