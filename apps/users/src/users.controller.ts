@@ -17,7 +17,6 @@ export class UsersController implements UsersServiceController {
     return this.usersService.createUser(createUserDto);
   }
 
-  // @ts-ignore
   findAllUsers() {
     return this.usersService.findAll();
   }
