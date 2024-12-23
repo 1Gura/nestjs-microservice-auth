@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from '@app/common';
+import { CreateUserDto, UpdateUserDto } from '@app/common';
 
 @Controller('users')
 export class UsersController {
@@ -16,6 +16,12 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Post('/create')
+  create(createUserRequest: CreateUserDto) {
+    console.log('PRIKOL');
+    return this.usersService.create(createUserRequest);
   }
 
   @Post('login')
