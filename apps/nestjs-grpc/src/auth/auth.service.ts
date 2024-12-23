@@ -22,7 +22,9 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class AuthService implements OnModuleInit {
   private authServiceClient: AuthServiceClient;
+
   constructor(@Inject(AUTH_SERVICE) private client: ClientGrpc) {}
+
   onModuleInit() {
     this.authServiceClient =
       this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME);

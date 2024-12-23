@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -13,22 +13,19 @@ import {
   User,
   UserInfoRequest,
   UserInfoResponse,
-  USERS_SERVICE_NAME,
   UsersServiceClient,
 } from '@app/common';
-import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom, Observable } from 'rxjs';
-import { USER_SERVICE } from '../../nestjs-grpc/src/constants';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private auth_tokens = [];
   private usersService: UsersServiceClient;
 
-  constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
+  // constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
   onModuleInit(): void {
-    this.usersService =
-      this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
+    // this.usersService =
+    //   this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {

@@ -15,6 +15,7 @@ import { join } from 'path';
         options: {
           package: USER_PACKAGE_NAME,
           protoPath: join(__dirname, '../user.proto'),
+          url: 'localhost:3002', // gRPC-сервер users
         },
       },
     ]),
