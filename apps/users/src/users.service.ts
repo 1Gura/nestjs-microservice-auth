@@ -39,8 +39,25 @@ export class UsersService implements OnModuleInit {
     return user;
   }
 
-  findAll(): Users {
-    return { users: this.users };
+  async findAll() {
+    const users = await this.userRepository.find();
+
+    const dtoUsers = users.map(
+      (user) =>
+        ({
+          age: 0,
+          password: user.password,
+          username: user.email,
+          email: user.email,
+          id: `${user.id}`,
+          socialMedia: {},
+          subscribed: false,
+        }) as User,
+    );
+
+    return {
+      users: dtoUsers,
+    } as Users;
   }
 
   findOne(id: string): User {
