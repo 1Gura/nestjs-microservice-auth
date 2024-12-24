@@ -24,12 +24,8 @@ export class UsersController {
   create(@Body() createUserRequest: CreateUserDto) {
     return this.usersService.create(createUserRequest).pipe(
       catchError((error) => {
-        console.log(error);
-
-        if (error.response?.details) {
-          return throwError(
-            () => new BadRequestException(error.response.details),
-          );
+        if (error.details) {
+          return throwError(() => new BadRequestException(error.details));
         }
 
         return throwError(

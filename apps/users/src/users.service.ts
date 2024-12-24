@@ -1,13 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, User, Users } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as Entities from './db/entities/index';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -28,12 +24,8 @@ export class UsersService implements OnModuleInit {
     // Проверка на существование email
     const emailIsExist = await this.isEmailTaken(createUserDto.email);
     if (emailIsExist) {
-      throw new BadRequestException(
-        'Пользователь с таким email уже существует',
-      );
+      throw new RpcException('Пользователь с таким email уже существует');
     }
-
-    console.log('2');
 
     const user: Partial<User> = {
       ...createUserDto,
