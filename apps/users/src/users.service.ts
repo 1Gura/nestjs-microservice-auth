@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, User, Users } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,14 +25,23 @@ export class UsersService implements OnModuleInit {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const user: User = {
+    // Проверка на существование email
+    const emailIsExist = await this.isEmailTaken(createUserDto.email);
+    if (emailIsExist) {
+      throw new BadRequestException(
+        'Пользователь с таким email уже существует',
+      );
+    }
+
+    console.log('2');
+
+    const user: Partial<User> = {
       ...createUserDto,
-      id: '',
       subscribed: false,
       socialMedia: { fbUri: undefined, twitterUri: undefined },
     };
 
-    const newUser = this.userRepository.create({
+    const newUser: Entities.User = this.userRepository.create({
       email: user.email,
       password: user.password,
     });
@@ -36,7 +50,7 @@ export class UsersService implements OnModuleInit {
 
     user.id = `${newUser.id}`;
 
-    return user;
+    return user as User;
   }
 
   async findAll() {
@@ -87,5 +101,12 @@ export class UsersService implements OnModuleInit {
     }
 
     throw new NotFoundException(`User not found by ${id}`);
+  }
+
+  private async isEmailTaken(email: string): Promise<boolean> {
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+    return !!existingUser; // Вернет true, если пользователь найден
   }
 }

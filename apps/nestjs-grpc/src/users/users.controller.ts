@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from '@app/common';
+import { catchError, throwError } from 'rxjs';
 
 @Controller('users')
 export class UsersController {
@@ -18,10 +20,26 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Post('/create')
-  create(createUserRequest: CreateUserDto) {
-    console.log('PRIKOL');
-    return this.usersService.create(createUserRequest);
+  @Post('create')
+  create(@Body() createUserRequest: CreateUserDto) {
+    return this.usersService.create(createUserRequest).pipe(
+      catchError((error) => {
+        console.log(error);
+
+        if (error.response?.details) {
+          return throwError(
+            () => new BadRequestException(error.response.details),
+          );
+        }
+
+        return throwError(
+          () =>
+            new BadRequestException(
+              'Произошла ошибка при создании пользователя',
+            ),
+        );
+      }),
+    );
   }
 
   @Post('login')
