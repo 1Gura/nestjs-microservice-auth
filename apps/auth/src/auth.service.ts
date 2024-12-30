@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -15,22 +15,23 @@ import {
   UserInfoResponse,
   UsersServiceClient,
 } from '@app/common';
-import { lastValueFrom, Observable } from 'rxjs';
+import { lastValueFrom, map, Observable, take } from 'rxjs';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private auth_tokens = [];
-  private usersService: UsersServiceClient;
+  private usersServiceClient: UsersServiceClient;
 
   // constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
   onModuleInit(): void {
-    // this.usersService =
+    // this.usersServiceClient =
     //   this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user: User = await lastValueFrom(
-      this.usersService.findOneUser({ email }),
+      this.usersServiceClient.findOneUser({ email }),
     );
     if (!user || user.password !== password) {
       return null;
@@ -58,35 +59,35 @@ export class AuthService implements OnModuleInit {
   register(
     registerRequest: RegisterRequest,
   ): Observable<RegisterResponse> | RegisterResponse {
-    if (
-      registerRequest?.username &&
-      registerRequest?.password &&
-      registerRequest?.email
-    ) {
-      // return this.usersService
-      //   .createUser({
-      //     username: registerRequest.username,
-      //     password: registerRequest.password,
-      //     email: registerRequest.email,
-      //     age: 0,
-      //   })
-      //   .pipe(
-      //     map((user: User) => {
-      //       console.log(user);
-      //       debugger;
-      //
-      //       return {
-      //         message: `${user.id}, ${user.email}, ${user.password}, ${user.username}, ${user.age}`,
-      //         success: true,
-      //       } as RegisterResponse;
-      //     }),
-      //     take(1),
-      //   );
-
-      return { message: 'AUTH', success: true };
+    const { email, password, username } = registerRequest;
+    // Валидация входных данных
+    if (!email || !password || !username) {
+      throw new RpcException('Все поля являются обязательными!');
     }
 
-    throw new Error('Invalid credentials');
+    if (password.length < 5) {
+      throw new RpcException('Пароль должен быть не менее 5 символов');
+    }
+
+    return this.usersServiceClient
+      .createUser({
+        username: registerRequest.username,
+        password: registerRequest.password,
+        email: registerRequest.email,
+        age: 0,
+      })
+      .pipe(
+        map((user: User) => {
+          console.log(user);
+          debugger;
+
+          return {
+            message: `${user.id}, ${user.email}, ${user.password}, ${user.username}, ${user.age}`,
+            success: true,
+          } as RegisterResponse;
+        }),
+        take(1),
+      );
   }
 
   logout({ token }: LogoutRequest): LogoutResponse {

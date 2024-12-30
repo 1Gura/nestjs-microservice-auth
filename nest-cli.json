@@ -6,18 +6,18 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/nestjs-grpc/tsconfig.app.json"
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/nestjs-grpc",
+  "root": "apps/api-gateway",
   "projects": {
-    "nestjs-grpc": {
+    "api-gateway": {
       "type": "application",
-      "root": "apps/nestjs-grpc",
+      "root": "apps/api-gateway",
       "entryFile": "src/main",
       "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/nestjs-grpc/tsconfig.app.json",
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
         "assets": [
           "proto/*.proto"
         ],
