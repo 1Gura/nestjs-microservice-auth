@@ -117,23 +117,6 @@ export class AuthService implements OnModuleInit {
           );
         }),
       );
-
-    // return this.usersServiceClient
-    //   .createUser({
-    //     username: registerRequest.username,
-    //     password: registerRequest.password,
-    //     email: registerRequest.email,
-    //     age: 0,
-    //   })
-    //   .pipe(
-    //     map((user: User) => {
-    //       return {
-    //         message: `${user.id}, ${user.email}, ${user.password}, ${user.username}, ${user.age}`,
-    //         success: true,
-    //       } as RegisterResponse;
-    //     }),
-    //     take(1),
-    //   );
   }
 
   logout({ token }: LogoutRequest): LogoutResponse {
