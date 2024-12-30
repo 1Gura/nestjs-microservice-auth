@@ -8,7 +8,7 @@
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
-export const protobufPackage = "auth";
+export const authProtobufPackage = "auth";
 
 /** Сообщение для отправки данных для логина */
 export interface LoginRequest {

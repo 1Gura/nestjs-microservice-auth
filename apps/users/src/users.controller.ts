@@ -4,6 +4,7 @@ import {
   CreateUserDto,
   FindOneUserDto,
   UpdateUserDto,
+  User,
   UsersServiceController,
   UsersServiceControllerMethods,
 } from '@app/common';
@@ -21,8 +22,8 @@ export class UsersController implements UsersServiceController {
     return this.usersService.findAll();
   }
 
-  findOneUser(request: FindOneUserDto) {
-    return this.usersService.findOneUser(request);
+  async findOneUser(request: FindOneUserDto): Promise<User> {
+    return await this.usersService.findOneUser(request);
   }
 
   updateUser(updateUserDto: UpdateUserDto) {

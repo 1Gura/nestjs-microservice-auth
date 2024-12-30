@@ -85,7 +85,7 @@ export class AuthService implements OnModuleInit {
       .pipe(
         take(1),
         switchMap((existingUser: User) => {
-          if (existingUser) {
+          if (existingUser?.email) {
             throw new RpcException('Пользователь с таким email уже существует');
           }
 

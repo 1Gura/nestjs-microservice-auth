@@ -72,26 +72,29 @@ export class UsersService implements OnModuleInit {
     } as Users;
   }
 
-  async findOneUser(findOneUserDto: FindOneUserDto) {
+  async findOneUser(findOneUserDto: FindOneUserDto): Promise<User> {
     let userRepository;
 
-    if (findOneUserDto.id) {
+    if (findOneUserDto?.id) {
       userRepository = await this.userRepository.findOne({
-        where: { id: findOneUserDto.id },
+        where: { id: findOneUserDto?.id },
       });
     }
-    if (findOneUserDto.email) {
-      userRepository = this.userRepository.findOne({
-        where: { email: findOneUserDto.email },
+
+    if (findOneUserDto?.email) {
+      userRepository = await this.userRepository.findOne({
+        where: { email: findOneUserDto?.email },
       });
     }
 
     return {
-      ...userRepository,
+      id: userRepository?.id ?? '',
+      email: userRepository?.email ?? '',
+      password: userRepository?.password ?? '',
       subscribed: false,
       socialMedia: { fbUri: undefined, twitterUri: undefined },
       age: 0,
-      username: userRepository.email,
+      username: userRepository?.email,
     } as User;
   }
 

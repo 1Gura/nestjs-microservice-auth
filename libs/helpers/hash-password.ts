@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt'; // Альтернативный импорт, если 'bcrypt' не работает
 
 export async function hashPassword(password: string): Promise<string> {
   const saltRounds = Number(process.env.SALT_ROUNDS) || 12;
