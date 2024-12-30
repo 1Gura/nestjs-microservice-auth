@@ -10,10 +10,11 @@ message LoginRequest {
 
 // Сообщение для ответа на запрос логина
 message LoginResponse {
-  string token = 1;  // Токен для аутентификации (JWT или другой)
+  string access_token = 1;  // Токен для аутентификации (JWT или другой)
   string refresh_token = 2;  // Рефреш-токен для обновления доступа
   bool success = 3;  // Успешность логина
   string message = 4;  // Сообщение об ошибке или успехе
+  UserInfoRequest user = 5;
 }
 
 // Сообщение для регистрации нового пользователя
@@ -27,6 +28,9 @@ message RegisterRequest {
 message RegisterResponse {
   bool success = 1;     // Успешность регистрации
   string message = 2;   // Сообщение об ошибке или успехе
+  string access_token = 3; // токен
+  string refresh_token = 4;  // Рефреш-токен для обновления доступа
+  UserInfoRequest user = 5;
 }
 
 // Сообщение для проверки токена
@@ -67,6 +71,8 @@ message ChangePasswordResponse {
 // Сообщение для получения данных пользователя
 message UserInfoRequest {
   string username = 1;  // Имя пользователя
+  string id = 2;
+  string email = 3;
 }
 
 // Ответ на запрос получения информации о пользователе

@@ -4,6 +4,7 @@ import {
   ChangePasswordResponse,
   CheckTokenRequest,
   CheckTokenResponse,
+  CreateUserDto,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
@@ -13,20 +14,25 @@ import {
   User,
   UserInfoRequest,
   UserInfoResponse,
+  USERS_SERVICE_NAME,
   UsersServiceClient,
 } from '@app/common';
-import { lastValueFrom, map, Observable, take } from 'rxjs';
-import { RpcException } from '@nestjs/microservices';
+import { from, lastValueFrom, map, Observable, switchMap, take } from 'rxjs';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
+import { USER_SERVICE } from '../../api-gateway/src/constants';
+import { validateEmail } from '../../../libs/helpers/validateEmail';
+import { hashPassword } from '../../../libs/helpers/hash-password';
+import { generateAuthToken } from '../../../libs/helpers/generate-auth-token';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private auth_tokens = [];
   private usersServiceClient: UsersServiceClient;
 
-  // constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
+  constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
   onModuleInit(): void {
-    // this.usersServiceClient =
-    //   this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
+    this.usersServiceClient =
+      this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -42,9 +48,10 @@ export class AuthService implements OnModuleInit {
   login({ username, password }: LoginRequest): LoginResponse {
     // В продакшн-коде тут должна быть валидация юзера (БД)
     if (username === 'admin' && password === 'password') {
-      const loginResponseSuccess = {
+      const loginResponseSuccess: LoginResponse = {
+        user: undefined,
         message: 'Success',
-        token: 'MOCK_TOCKEN',
+        accessToken: 'MOCK_TOCKEN',
         refreshToken: 'MOCK_REFRESH_TOKEN',
         success: true,
       };
@@ -65,29 +72,68 @@ export class AuthService implements OnModuleInit {
       throw new RpcException('Все поля являются обязательными!');
     }
 
+    if (!validateEmail(email)) {
+      throw new RpcException('Некорректный формат email');
+    }
+
     if (password.length < 5) {
       throw new RpcException('Пароль должен быть не менее 5 символов');
     }
 
     return this.usersServiceClient
-      .createUser({
-        username: registerRequest.username,
-        password: registerRequest.password,
-        email: registerRequest.email,
-        age: 0,
-      })
+      .findOneUser({ id: undefined, email: email })
       .pipe(
-        map((user: User) => {
-          console.log(user);
-          debugger;
-
-          return {
-            message: `${user.id}, ${user.email}, ${user.password}, ${user.username}, ${user.age}`,
-            success: true,
-          } as RegisterResponse;
-        }),
         take(1),
+        switchMap((existingUser: User) => {
+          if (existingUser) {
+            throw new RpcException('Пользователь с таким email уже существует');
+          }
+
+          return from(hashPassword(password));
+        }),
+        switchMap((hashedPassword: string) =>
+          this.usersServiceClient.createUser({
+            password: hashedPassword,
+            email,
+            username,
+            age: 0,
+          }),
+        ),
+        switchMap((user: User) => {
+          return from(generateAuthToken(user.id)).pipe(
+            map((accessToken: string) => {
+              return {
+                message: `Пользователь зарегистрирован: ${user.username}, ${user.email}`,
+                success: true,
+                user: {
+                  id: user.id,
+                  username: user.username,
+                  email: user.email,
+                },
+                accessToken,
+                refreshToken: '',
+              } as RegisterResponse;
+            }),
+          );
+        }),
       );
+
+    // return this.usersServiceClient
+    //   .createUser({
+    //     username: registerRequest.username,
+    //     password: registerRequest.password,
+    //     email: registerRequest.email,
+    //     age: 0,
+    //   })
+    //   .pipe(
+    //     map((user: User) => {
+    //       return {
+    //         message: `${user.id}, ${user.email}, ${user.password}, ${user.username}, ${user.age}`,
+    //         success: true,
+    //       } as RegisterResponse;
+    //     }),
+    //     take(1),
+    //   );
   }
 
   logout({ token }: LogoutRequest): LogoutResponse {

@@ -24,7 +24,6 @@ export class UsersService implements OnModuleInit {
   }
 
   findAll() {
-    console.log(this.usersServiceClient);
     return this.usersServiceClient.findAllUsers({});
   }
 

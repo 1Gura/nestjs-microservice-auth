@@ -1,5 +1,11 @@
 import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto, User, Users } from '@app/common';
+import {
+  CreateUserDto,
+  FindOneUserDto,
+  UpdateUserDto,
+  User,
+  Users,
+} from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as Entities from './db/entities/index';
@@ -66,8 +72,27 @@ export class UsersService implements OnModuleInit {
     } as Users;
   }
 
-  findOne(id: string): User {
-    return this.users.find((user) => user.id === id);
+  async findOneUser(findOneUserDto: FindOneUserDto) {
+    let userRepository;
+
+    if (findOneUserDto.id) {
+      userRepository = await this.userRepository.findOne({
+        where: { id: findOneUserDto.id },
+      });
+    }
+    if (findOneUserDto.email) {
+      userRepository = this.userRepository.findOne({
+        where: { email: findOneUserDto.email },
+      });
+    }
+
+    return {
+      ...userRepository,
+      subscribed: false,
+      socialMedia: { fbUri: undefined, twitterUri: undefined },
+      age: 0,
+      username: userRepository.email,
+    } as User;
   }
 
   update(id: string, updateUserDto: UpdateUserDto): User {
@@ -95,7 +120,7 @@ export class UsersService implements OnModuleInit {
     throw new NotFoundException(`User not found by ${id}`);
   }
 
-  private async isEmailTaken(email: string): Promise<boolean> {
+  public async isEmailTaken(email: string): Promise<boolean> {
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
