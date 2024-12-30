@@ -4,7 +4,6 @@ import {
   ChangePasswordResponse,
   CheckTokenRequest,
   CheckTokenResponse,
-  CreateUserDto,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
