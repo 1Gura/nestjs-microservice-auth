@@ -6,6 +6,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICE } from '../../api-gateway/src/constants';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { join } from 'path';
         },
       },
     ]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'your_jwt_secret', // Укажите секретный ключ
+      signOptions: { expiresIn: '1h' }, // Настройте опционально время жизни токена
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService],

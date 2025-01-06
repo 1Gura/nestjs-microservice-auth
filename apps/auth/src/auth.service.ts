@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -22,13 +27,17 @@ import { USER_SERVICE } from '../../api-gateway/src/constants';
 import { validateEmail } from '../../../libs/helpers/validateEmail';
 import { hashPassword } from '../../../libs/helpers/hash-password';
 import { generateAuthToken } from '../../../libs/helpers/generate-auth-token';
+import { compare } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private auth_tokens = [];
   private usersServiceClient: UsersServiceClient;
 
-  constructor(@Inject(USER_SERVICE) private readonly client: ClientGrpc) {}
+  constructor(
+    @Inject(USER_SERVICE) private readonly client: ClientGrpc,
+    private readonly jwtService: JwtService,
+  ) {}
   onModuleInit(): void {
     this.usersServiceClient =
       this.client.getService<UsersServiceClient>(USERS_SERVICE_NAME);
@@ -44,22 +53,47 @@ export class AuthService implements OnModuleInit {
     return user;
   }
 
-  login({ username, password }: LoginRequest): LoginResponse {
-    // В продакшн-коде тут должна быть валидация юзера (БД)
-    if (username === 'admin' && password === 'password') {
-      const loginResponseSuccess: LoginResponse = {
-        user: undefined,
-        message: 'Success',
-        accessToken: 'MOCK_TOCKEN',
-        refreshToken: 'MOCK_REFRESH_TOKEN',
-        success: true,
-      };
-
-      this.auth_tokens.push(loginResponseSuccess);
-
-      return loginResponseSuccess;
+  login({
+    username,
+    password,
+    email,
+  }: LoginRequest): Observable<LoginResponse> {
+    if (!email || !username || !password) {
+      throw new RpcException('Все поля являются обязательными');
     }
-    throw new Error('Invalid credentials');
+
+    return this.usersServiceClient.findOneUser({ email }).pipe(
+      switchMap(async (user: User) => {
+        console.log(user);
+        if (!user) {
+          throw new RpcException('Пользователь с таким email не был найден');
+        }
+
+        // Проверяем пароль
+        const isPasswordValid = await compare(password, user.password);
+        if (!isPasswordValid) {
+          throw new UnauthorizedException('Неверный пароль');
+        }
+
+        // Генерация токена
+        const payload = { id: user.id, email: user.email };
+        const accessToken = await this.jwtService.signAsync(payload);
+
+        const userInfoRequest = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+        } as UserInfoRequest;
+
+        // Формируем ответ
+        return {
+          accessToken,
+          message: 'Успешный вход',
+          success: true,
+          user: userInfoRequest,
+        } as LoginResponse;
+      }),
+    );
   }
 
   register(
