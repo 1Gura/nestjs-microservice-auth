@@ -29,6 +29,8 @@ import { hashPassword } from '../../../libs/helpers/hash-password';
 import { generateAuthToken } from '../../../libs/helpers/generate-auth-token';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import * as crypto from 'crypto';
+import { RefreshTokenService } from './refresh-token.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -37,6 +39,7 @@ export class AuthService implements OnModuleInit {
   constructor(
     @Inject(USER_SERVICE) private readonly client: ClientGrpc,
     private readonly jwtService: JwtService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
   onModuleInit(): void {
     this.usersServiceClient =
@@ -64,7 +67,6 @@ export class AuthService implements OnModuleInit {
 
     return this.usersServiceClient.findOneUser({ email }).pipe(
       switchMap(async (user: User) => {
-        console.log(user);
         if (!user) {
           throw new RpcException('Пользователь с таким email не был найден');
         }
@@ -77,7 +79,21 @@ export class AuthService implements OnModuleInit {
 
         // Генерация токена
         const payload = { id: user.id, email: user.email };
-        const accessToken = await this.jwtService.signAsync(payload);
+        const accessToken = await this.jwtService.signAsync(payload, {
+          expiresIn: '15m',
+        });
+
+        const refreshToken = crypto.randomBytes(32).toString('hex');
+        // Сохранение RefreshToken в базе через RefreshTokenService
+        await this.refreshTokenService.saveRefreshToken({
+          user: {
+            id: user.id,
+            email: user.email,
+            password: user.password,
+            username: user.username,
+          },
+          token: refreshToken,
+        });
 
         const userInfoRequest = {
           id: user.id,
@@ -88,6 +104,7 @@ export class AuthService implements OnModuleInit {
         // Формируем ответ
         return {
           accessToken,
+          refreshToken,
           message: 'Успешный вход',
           success: true,
           user: userInfoRequest,
@@ -118,6 +135,7 @@ export class AuthService implements OnModuleInit {
       .pipe(
         take(1),
         switchMap((existingUser: User) => {
+          // TODO изменить ответ на возможность получения null или undefined, сейчас тут костыль
           if (existingUser?.email) {
             throw new RpcException('Пользователь с таким email уже существует');
           }
@@ -133,6 +151,7 @@ export class AuthService implements OnModuleInit {
           }),
         ),
         switchMap((user: User) => {
+          console.log(user);
           return from(generateAuthToken(user.id)).pipe(
             map((accessToken: string) => {
               return {
@@ -152,12 +171,14 @@ export class AuthService implements OnModuleInit {
       );
   }
 
-  logout({ token }: LogoutRequest): LogoutResponse {
-    if (token) {
-      return { message: 'SUCCESS', success: true };
-    }
+  async logout({ token }: LogoutRequest): Promise<LogoutResponse> {
+    // Удаляем токен
+    await this.refreshTokenService.deleteRefreshToken(token);
 
-    return { message: 'TOKEN_NOT_FOUND', success: true };
+    return {
+      success: true,
+      message: 'Refresh token was deleted',
+    };
   }
 
   checkToken({ token }: CheckTokenRequest): CheckTokenResponse {

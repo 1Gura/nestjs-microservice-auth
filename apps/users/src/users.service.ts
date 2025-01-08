@@ -28,6 +28,7 @@ export class UsersService implements OnModuleInit {
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     // Проверка на существование email
+    console.log(createUserDto);
     const emailIsExist = await this.isEmailTaken(createUserDto.email);
     if (emailIsExist) {
       throw new RpcException('Пользователь с таким email уже существует');
@@ -42,6 +43,7 @@ export class UsersService implements OnModuleInit {
     const newUser: Entities.User = this.userRepository.create({
       email: user.email,
       password: user.password,
+      username: user.username,
     });
 
     await this.userRepository.save(newUser);

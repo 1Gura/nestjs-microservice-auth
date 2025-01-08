@@ -12,7 +12,7 @@ import { User } from './entities';
       password: 'user_password',
       database: 'user_db',
       entities: [User], // Укажите сущности
-      synchronize: true, // Автоматическое создание таблиц, для разработки удобно, но не рекомендуется на продакшене
+      synchronize: true, // Выключить в продакшене!
     }),
     TypeOrmModule.forFeature([User]), // Подключите сущности
   ],

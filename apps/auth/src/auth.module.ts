@@ -7,6 +7,8 @@ import { USER_SERVICE } from '../../api-gateway/src/constants';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { JwtModule } from '@nestjs/jwt';
+import { RefreshToken } from './db/refresh-token.entity';
+import { RefreshTokenService } from './refresh-token.service';
 
 @Module({
   imports: [
@@ -19,10 +21,11 @@ import { JwtModule } from '@nestjs/jwt';
       database: 'auth_db',
       entities: [
         // Добавьте свои сущности для авторизации
-        // AuthEntity,
+        RefreshToken,
       ],
       synchronize: true, // Включите для разработки, для продакшн выключите
     }),
+    TypeOrmModule.forFeature([RefreshToken]), // Подключите сущности
     ClientsModule.register([
       {
         name: USER_SERVICE,
@@ -40,7 +43,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, RefreshTokenService],
   exports: [AuthService],
 })
 export class AuthModule {}

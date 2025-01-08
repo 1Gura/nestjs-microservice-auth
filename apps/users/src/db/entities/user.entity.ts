@@ -1,12 +1,15 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('users') // Имя таблицы в базе данных
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid') // Используем UUID для строкового идентификатора
-  id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string; // Идентификатор пользователя
 
-  @Column({ unique: true })
-  email: string; // Логин пользователя
+  @Column()
+  username: string;
+
+  @Column()
+  email: string;
 
   @Column()
   password: string; // Захэшированный пароль
