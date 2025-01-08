@@ -1,6 +1,12 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginRequest, RegisterRequest, RegisterResponse } from '@app/common';
+import {
+  LoginRequest,
+  LogoutRequest,
+  LogoutResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from '@app/common';
 import { catchError, Observable, throwError } from 'rxjs';
 
 @Controller('auth')
@@ -27,5 +33,10 @@ export class AuthController {
   @Post('/login')
   login(@Body() loginRequest: LoginRequest): Observable<RegisterResponse> {
     return this.authService.login(loginRequest);
+  }
+
+  @Post('/logout')
+  logout(@Body() loginRequest: LogoutRequest): Observable<LogoutResponse> {
+    return this.authService.logout(loginRequest);
   }
 }
