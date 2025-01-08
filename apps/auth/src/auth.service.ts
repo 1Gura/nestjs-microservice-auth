@@ -151,7 +151,6 @@ export class AuthService implements OnModuleInit {
           }),
         ),
         switchMap((user: User) => {
-          console.log(user);
           return from(generateAuthToken(user.id)).pipe(
             map((accessToken: string) => {
               return {
@@ -181,8 +180,11 @@ export class AuthService implements OnModuleInit {
     };
   }
 
-  checkToken({ token }: CheckTokenRequest): CheckTokenResponse {
-    if (token === 'mockAccessToken123') {
+  async checkToken({ token }: CheckTokenRequest): Promise<CheckTokenResponse> {
+    const currentToken =
+      await this.refreshTokenService.findRefreshTokenByToken(token);
+
+    if (token === currentToken.token) {
       return { message: 'SUCCESS', valid: true };
     }
 

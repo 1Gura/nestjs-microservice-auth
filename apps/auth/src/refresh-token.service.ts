@@ -17,8 +17,6 @@ export class RefreshTokenService {
   }): Promise<void> {
     const { user, token } = refreshTokenData;
 
-    console.log(user);
-
     const refreshToken = this.refreshTokenRepository.create({
       userId: user.id,
       token,
