@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AuthModule } from './auth.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { ValidationInterceptor } from '@app/common/interceptors/validation-interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -15,6 +16,9 @@ async function bootstrap() {
       },
     },
   );
+
+  app.useGlobalInterceptors(new ValidationInterceptor());
+
   await app.listen();
 }
 bootstrap();

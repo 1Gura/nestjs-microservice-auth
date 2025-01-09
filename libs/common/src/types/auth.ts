@@ -7,6 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
+import { Metadata } from '@grpc/grpc-js';
 
 export const protobufPackage = "auth";
 
@@ -126,7 +127,7 @@ export const AUTH_PACKAGE_NAME = "auth";
 export interface AuthServiceClient {
   /** Метод для логина */
 
-  login(request: LoginRequest): Observable<LoginResponse>;
+  login(request: LoginRequest, metadata: Metadata): Observable<LoginResponse>;
 
   /** Метод для регистрации */
 
@@ -154,7 +155,7 @@ export interface AuthServiceClient {
 export interface AuthServiceController {
   /** Метод для логина */
 
-  login(request: LoginRequest): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
+  login(request: LoginRequest,  metadata: Metadata): Promise<LoginResponse> | Observable<LoginResponse> | LoginResponse;
 
   /** Метод для регистрации */
 

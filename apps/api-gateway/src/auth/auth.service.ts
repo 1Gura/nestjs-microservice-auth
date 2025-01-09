@@ -18,6 +18,7 @@ import {
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -31,7 +32,9 @@ export class AuthService implements OnModuleInit {
   }
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.authServiceClient.login(request);
+    const metadata = new Metadata();
+    metadata.add('x-api-gateway', 'secure-gateway'); // Добавляем заголовок
+    return this.authServiceClient.login(request, metadata);
   }
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
