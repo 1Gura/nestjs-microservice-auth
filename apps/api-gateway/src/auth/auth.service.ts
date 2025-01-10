@@ -19,6 +19,7 @@ import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
+import * as process from 'node:process';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -33,16 +34,20 @@ export class AuthService implements OnModuleInit {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     const metadata = new Metadata();
-    metadata.add('x-api-gateway', 'secure-gateway'); // Добавляем заголовок
+    metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
     return this.authServiceClient.login(request, metadata);
   }
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
-    return this.authServiceClient.register(request);
+    const metadata = new Metadata();
+    metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
+    return this.authServiceClient.register(request, metadata);
   }
 
   checkToken(request: CheckTokenRequest): Observable<CheckTokenResponse> {
-    return this.authServiceClient.checkToken(request);
+    const metadata = new Metadata();
+    metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
+    return this.authServiceClient.checkToken(request, metadata);
   }
 
   logout(request: LogoutRequest): Observable<LogoutResponse> {

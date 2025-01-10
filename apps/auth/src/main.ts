@@ -3,8 +3,10 @@ import { AuthModule } from './auth.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ValidationInterceptor } from '@app/common/interceptors/validation-interceptor';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+  dotenv.config();
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AuthModule,
     {

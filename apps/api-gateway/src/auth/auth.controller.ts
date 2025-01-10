@@ -3,7 +3,7 @@ import {
   Body,
   Controller,
   Post,
-  Req,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -16,6 +16,7 @@ import {
   RegisterResponse,
 } from '@app/common';
 import { catchError, Observable, throwError } from 'rxjs';
+import { TokenInterceptor } from '@app/common/interceptors/token-interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -49,6 +50,7 @@ export class AuthController {
   }
 
   @Post('/checktoken')
+  @UseInterceptors(TokenInterceptor)
   checkToken(
     @Body() request: CheckTokenRequest,
   ): Observable<CheckTokenResponse> {

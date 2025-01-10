@@ -31,6 +31,7 @@ import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { RefreshTokenService } from './refresh-token.service';
+import * as process from 'node:process';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -80,6 +81,7 @@ export class AuthService implements OnModuleInit {
         // Генерация токена
         const payload = { id: user.id, email: user.email };
         const accessToken = await this.jwtService.signAsync(payload, {
+          secret: process.env.JWT_SECRET,
           expiresIn: '15m',
         });
 

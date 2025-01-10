@@ -11,10 +11,9 @@ import { Observable } from 'rxjs';
 export class ValidationInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const metadata = context.switchToRpc().getContext(); // Получение gRPC метаданных
-    console.log(metadata);
     const apiGatewayHeader = metadata?.get('x-api-gateway')?.[0]; // Доступ к заголовку
 
-    if (!apiGatewayHeader || apiGatewayHeader !== 'secure-gateway') {
+    if (!apiGatewayHeader || apiGatewayHeader !== process.env.SECRET_HEADER) {
       throw new UnauthorizedException('Access denied: invalid gateway header');
     }
 

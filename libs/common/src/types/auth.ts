@@ -131,11 +131,11 @@ export interface AuthServiceClient {
 
   /** Метод для регистрации */
 
-  register(request: RegisterRequest): Observable<RegisterResponse>;
+  register(request: RegisterRequest, metadata?: Metadata): Observable<RegisterResponse>;
 
   /** Метод для проверки токена */
 
-  checkToken(request: CheckTokenRequest): Observable<CheckTokenResponse>;
+  checkToken(request: CheckTokenRequest, metadata?: Metadata): Observable<CheckTokenResponse>;
 
   /** Метод для выхода из системы */
 

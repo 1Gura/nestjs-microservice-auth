@@ -3,8 +3,11 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { UsersModule } from './users.module';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+  dotenv.config();
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     UsersModule,
     {

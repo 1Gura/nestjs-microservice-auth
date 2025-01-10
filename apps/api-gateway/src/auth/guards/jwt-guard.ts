@@ -14,7 +14,6 @@ export class GrpcAuthGuard implements CanActivate {
     const rpcContext = context.switchToRpc();
     const metadata: Metadata = rpcContext.getContext().metadata; // Получаем метаданные
 
-    console.log(metadata);
     if (!metadata) {
       throw new UnauthorizedException('Токен отсутствует');
     }
