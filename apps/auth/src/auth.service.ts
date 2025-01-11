@@ -21,7 +21,16 @@ import {
   USERS_SERVICE_NAME,
   UsersServiceClient,
 } from '@app/common';
-import { from, lastValueFrom, map, Observable, switchMap, take } from 'rxjs';
+import {
+  forkJoin,
+  from,
+  lastValueFrom,
+  Observable,
+  of,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { USER_SERVICE } from '../../api-gateway/src/constants';
 import { validateEmail } from '../../../libs/helpers/validateEmail';
@@ -118,6 +127,10 @@ export class AuthService implements OnModuleInit {
   register(
     registerRequest: RegisterRequest,
   ): Observable<RegisterResponse> | RegisterResponse {
+    let accessToken = '';
+    let refreshToken = '';
+    let newUser: any;
+
     const { email, password, username } = registerRequest;
     // Валидация входных данных
     if (!email || !password || !username) {
@@ -153,21 +166,45 @@ export class AuthService implements OnModuleInit {
           }),
         ),
         switchMap((user: User) => {
-          return from(generateAuthToken(user.id)).pipe(
-            map((accessToken: string) => {
-              return {
-                message: `Пользователь зарегистрирован: ${user.username}, ${user.email}`,
-                success: true,
-                user: {
-                  id: user.id,
-                  username: user.username,
-                  email: user.email,
-                },
-                accessToken,
-                refreshToken: '',
-              } as RegisterResponse;
+          newUser = user;
+
+          return forkJoin([
+            from(generateAuthToken(user.id)),
+            of(crypto.randomBytes(32).toString('hex')),
+          ]);
+        }),
+        tap(([access, refresh]: string[]) => {
+          accessToken = access;
+          refreshToken = refresh;
+        }),
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        switchMap(([_accessToken, refreshToken]: string[]) =>
+          from(
+            this.refreshTokenService.saveRefreshToken({
+              user: {
+                id: newUser.id,
+                email: newUser.email,
+                password: newUser.password,
+                username: newUser.username,
+              },
+              token: refreshToken,
             }),
-          );
+          ),
+        ),
+        switchMap(() => {
+          const userInfoRequest = {
+            id: newUser.id,
+            email: newUser.email,
+            username: newUser.username,
+          } as UserInfoRequest;
+
+          return of({
+            user: userInfoRequest,
+            message: `Пользователь зарегистрирован: ${newUser.username}, ${newUser.email}`,
+            success: true,
+            refreshToken,
+            accessToken,
+          } as RegisterResponse);
         }),
       );
   }
