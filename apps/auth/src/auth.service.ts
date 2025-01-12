@@ -35,7 +35,6 @@ import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { USER_SERVICE } from '../../api-gateway/src/constants';
 import { validateEmail } from '../../../libs/helpers/validateEmail';
 import { hashPassword } from '../../../libs/helpers/hash-password';
-import { generateAuthToken } from '../../../libs/helpers/generate-auth-token';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
@@ -45,6 +44,7 @@ import * as process from 'node:process';
 @Injectable()
 export class AuthService implements OnModuleInit {
   private usersServiceClient: UsersServiceClient;
+  private readonly ACCESS_TOKEN_EXPIRY = '15m';
 
   constructor(
     @Inject(USER_SERVICE) private readonly client: ClientGrpc,
@@ -71,7 +71,7 @@ export class AuthService implements OnModuleInit {
     password,
     email,
   }: LoginRequest): Observable<LoginResponse> {
-    if (!email || !username || !password) {
+    if ((!email && !username) || !password) {
       throw new RpcException('Все поля являются обязательными');
     }
 
@@ -89,12 +89,12 @@ export class AuthService implements OnModuleInit {
 
         // Генерация токена
         const payload = { id: user.id, email: user.email };
-        const accessToken = await this.jwtService.signAsync(payload, {
-          secret: process.env.JWT_SECRET,
-          expiresIn: '15m',
+        const accessToken = await this.generateAccessToken({
+          userId: payload.id,
+          email: user.email,
         });
 
-        const refreshToken = crypto.randomBytes(32).toString('hex');
+        const refreshToken = this.generateRefreshToken();
         // Сохранение RefreshToken в базе через RefreshTokenService
         await this.refreshTokenService.saveRefreshToken({
           user: {
@@ -169,8 +169,10 @@ export class AuthService implements OnModuleInit {
           newUser = user;
 
           return forkJoin([
-            from(generateAuthToken(user.id)),
-            of(crypto.randomBytes(32).toString('hex')),
+            from(
+              this.generateAccessToken({ userId: newUser.id, email: email }),
+            ),
+            of(this.generateRefreshToken()),
           ]);
         }),
         tap(([access, refresh]: string[]) => {
@@ -253,5 +255,21 @@ export class AuthService implements OnModuleInit {
     }
 
     throw new Error('USER_NOT_FOUND');
+  }
+
+  // Генерация accessToken
+  private generateAccessToken(payload: {
+    userId: string;
+    email: string;
+  }): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: this.ACCESS_TOKEN_EXPIRY,
+    });
+  }
+
+  // Генерация refreshToken
+  private generateRefreshToken(): string {
+    return crypto.randomBytes(32).toString('hex');
   }
 }

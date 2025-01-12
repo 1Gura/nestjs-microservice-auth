@@ -17,8 +17,10 @@ import {
 } from '@app/common';
 import { catchError, Observable, throwError } from 'rxjs';
 import { TokenInterceptor } from '@app/common/interceptors/token-interceptor';
+import { CookieInterceptor } from '@app/common/interceptors/сookie-interceptor';
 
 @Controller('auth')
+@UseInterceptors(CookieInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
