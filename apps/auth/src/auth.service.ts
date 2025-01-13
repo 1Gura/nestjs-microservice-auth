@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleInit,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -77,14 +72,14 @@ export class AuthService implements OnModuleInit {
 
     return this.usersServiceClient.findOneUser({ email }).pipe(
       switchMap(async (user: User) => {
-        if (!user) {
+        if (!user.email) {
           throw new RpcException('Пользователь с таким email не был найден');
         }
 
         // Проверяем пароль
         const isPasswordValid = await compare(password, user.password);
         if (!isPasswordValid) {
-          throw new UnauthorizedException('Неверный пароль');
+          throw new RpcException('Неверный пароль');
         }
 
         // Генерация токена

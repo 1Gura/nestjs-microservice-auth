@@ -43,7 +43,17 @@ export class AuthController {
 
   @Post('/login')
   login(@Body() request: LoginRequest): Observable<RegisterResponse> {
-    return this.authService.login(request);
+    return this.authService.login(request).pipe(
+      catchError((error) => {
+        if (error.details) {
+          return throwError(() => new BadRequestException(error.details));
+        }
+
+        return throwError(
+          () => new BadRequestException('Произошла ошибка при регистрации'),
+        );
+      }),
+    );
   }
 
   @Post('/logout')
