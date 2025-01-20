@@ -20,7 +20,6 @@ async function bootstrap() {
   );
 
   app.useGlobalInterceptors(new ValidationInterceptor());
-
   await app.listen();
 }
 bootstrap();

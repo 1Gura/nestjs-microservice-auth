@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Post,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -18,6 +19,7 @@ import {
 import { catchError, Observable, throwError } from 'rxjs';
 import { TokenInterceptor } from '@app/common/interceptors/token-interceptor';
 import { CookieInterceptor } from '@app/common/interceptors/сookie-interceptor';
+import { Request } from 'express';
 
 @Controller('auth')
 @UseInterceptors(CookieInterceptor)
@@ -61,11 +63,18 @@ export class AuthController {
     return this.authService.logout(request);
   }
 
-  @Post('/checktoken')
+  @Post('/checkaccesstoken')
   @UseInterceptors(TokenInterceptor)
   checkToken(
     @Body() request: CheckTokenRequest,
+    @Req() req: Request,
   ): Observable<CheckTokenResponse> {
-    return this.authService.checkToken(request);
+    return this.authService.checkToken(request, req);
+  }
+
+  @Post('/checkrefreshtoken')
+  checkRefreshToken(@Body() request: CheckTokenRequest, @Req() req: Request) {
+    console.log('data');
+    return this.authService.checkToken(request, req);
   }
 }

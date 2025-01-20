@@ -1,4 +1,10 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import {
   AUTH_SERVICE_NAME,
   AuthServiceClient,
@@ -20,6 +26,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import * as process from 'node:process';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -44,10 +51,21 @@ export class AuthService implements OnModuleInit {
     return this.authServiceClient.register(request, metadata);
   }
 
-  checkToken(request: CheckTokenRequest): Observable<CheckTokenResponse> {
+  checkToken(
+    request: CheckTokenRequest,
+    req: Request,
+  ): Observable<CheckTokenResponse> {
+    const refreshToken = req?.cookies.refreshToken;
+    console.log(refreshToken);
+    if (!refreshToken) {
+      throw new HttpException(
+        'Refresh token not provided',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     const metadata = new Metadata();
     metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
-    return this.authServiceClient.checkToken(request, metadata);
+    return this.authServiceClient.checkToken({ token: refreshToken }, metadata);
   }
 
   logout(request: LogoutRequest): Observable<LogoutResponse> {

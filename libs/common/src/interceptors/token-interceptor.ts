@@ -15,7 +15,6 @@ export class TokenInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
-
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header is missing');
     }
@@ -23,6 +22,7 @@ export class TokenInterceptor implements NestInterceptor {
     const token = authHeader.split(' ')[1];
     return this.validateToken(token).pipe(
       switchMap((tokenIsValid) => {
+        console.log(tokenIsValid);
         if (tokenIsValid) {
           return next.handle();
         }
