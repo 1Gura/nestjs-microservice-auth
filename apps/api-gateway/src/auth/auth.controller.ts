@@ -2,14 +2,15 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
   Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   CheckTokenRequest,
-  CheckTokenResponse,
   LoginRequest,
   LogoutRequest,
   LogoutResponse,
@@ -17,9 +18,9 @@ import {
   RegisterResponse,
 } from '@app/common';
 import { catchError, Observable, throwError } from 'rxjs';
-import { TokenInterceptor } from '@app/common/interceptors/token-interceptor';
 import { CookieInterceptor } from '@app/common/interceptors/сookie-interceptor';
 import { Request } from 'express';
+import { AuthGuard } from '@app/common/guards/auth-guard';
 
 @Controller('auth')
 @UseInterceptors(CookieInterceptor)
@@ -63,13 +64,11 @@ export class AuthController {
     return this.authService.logout(request);
   }
 
-  @Post('/checkaccesstoken')
-  @UseInterceptors(TokenInterceptor)
-  checkToken(
-    @Body() request: CheckTokenRequest,
-    @Req() req: Request,
-  ): Observable<CheckTokenResponse> {
-    return this.authService.checkToken(request, req);
+  @UseGuards(AuthGuard)
+  @Get('check')
+  checkAuth(): { isAuthenticated: boolean } {
+    // Если токен валиден, пользователь считается авторизованным
+    return { isAuthenticated: true };
   }
 
   @Post('/checkrefreshtoken')

@@ -8,10 +8,13 @@ import {
 import { catchError, from, Observable, of, switchMap, take } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
+import * as dotenv from 'dotenv';
 
 @Injectable()
 export class TokenInterceptor implements NestInterceptor {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {
+    dotenv.config();
+  }
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers['authorization'];
@@ -34,7 +37,7 @@ export class TokenInterceptor implements NestInterceptor {
   private validateToken(token: string) {
     return from(
       this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.JWT_SECRET || 'prikol',
       }),
     ).pipe(
       take(1),

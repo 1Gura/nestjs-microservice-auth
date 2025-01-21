@@ -5,6 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICE } from '../constants';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { join } from 'path';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, JwtService],
 })
 export class UsersModule {}
