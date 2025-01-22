@@ -1,8 +1,8 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('refresh_tokens')
@@ -14,7 +14,7 @@ export class RefreshToken {
   userId: string; // Храним только userId, без связи с сущностью User
 
   @Column()
-  token: string;
+  refreshToken: string;
 
   @CreateDateColumn()
   createdAt: Date;

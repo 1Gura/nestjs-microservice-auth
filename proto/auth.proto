@@ -34,15 +34,17 @@ message RegisterResponse {
   UserInfoRequest user = 5;
 }
 
-// Сообщение для проверки токена
-message CheckTokenRequest {
-  string token = 1;  // Токен для проверки
+// Сообщение для рефреша токена
+message RefreshTokenRequest {
+  string refreshToken = 1;  // Токен для проверки
 }
 
-// Ответ на запрос проверки токена
-message CheckTokenResponse {
+// Ответ на запрос рефреша токена
+message RefreshTokenResponse {
   bool valid = 1;     // Является ли токен действительным
   string message = 2; // Сообщение о статусе токена
+  string access_token = 3;  // Токен для аутентификации (JWT или другой)
+  string refresh_token = 4;  // Рефреш-токен для обновления доступа
 }
 
 // Сообщение для запроса на выход (logout)
@@ -91,8 +93,8 @@ service AuthService {
   // Метод для регистрации
   rpc Register(RegisterRequest) returns (RegisterResponse);
 
-  // Метод для проверки токена
-  rpc CheckToken(CheckTokenRequest) returns (CheckTokenResponse);
+  // Метод для рефреша access токена и обновления рефреш токена
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
 
   // Метод для выхода из системы
   rpc Logout(LogoutRequest) returns (LogoutResponse);

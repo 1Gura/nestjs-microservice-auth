@@ -1,16 +1,16 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   AuthServiceController,
   AuthServiceControllerMethods,
   ChangePasswordRequest,
   ChangePasswordResponse,
-  CheckTokenRequest,
-  CheckTokenResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
   LogoutResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   RegisterRequest,
   RegisterResponse,
   UserInfoRequest,
@@ -36,13 +36,13 @@ export class AuthController implements AuthServiceController {
     | RegisterResponse {
     return this.authService.register(request);
   }
-  checkToken(
-    request: CheckTokenRequest,
+  refreshToken(
+    request: RefreshTokenRequest,
   ):
-    | Promise<CheckTokenResponse>
-    | Observable<CheckTokenResponse>
-    | CheckTokenResponse {
-    return this.authService.checkToken(request);
+    | Promise<RefreshTokenResponse>
+    | Observable<RefreshTokenResponse>
+    | RefreshTokenResponse {
+    return this.authService.refreshToken(request);
   }
   logout(
     request: LogoutRequest,

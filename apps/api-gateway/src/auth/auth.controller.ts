@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  CheckTokenRequest,
   LoginRequest,
   LogoutRequest,
   LogoutResponse,
@@ -71,9 +70,8 @@ export class AuthController {
     return { isAuthenticated: true };
   }
 
-  @Post('/checkrefreshtoken')
-  checkRefreshToken(@Body() request: CheckTokenRequest, @Req() req: Request) {
-    console.log('data');
-    return this.authService.checkToken(request, req);
+  @Post('/refresh-token')
+  refreshToken(@Req() req: Request) {
+    return this.authService.refreshToken(req);
   }
 }

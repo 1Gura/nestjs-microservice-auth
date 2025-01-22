@@ -12,6 +12,8 @@ export class CookieInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
 
+    debugger;
+
     return next.handle().pipe(
       map((data) => {
         if (data?.refreshToken) {

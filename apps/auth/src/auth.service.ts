@@ -2,12 +2,12 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
-  CheckTokenRequest,
-  CheckTokenResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
   LogoutResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
   RegisterRequest,
   RegisterResponse,
   User,
@@ -17,6 +17,7 @@ import {
   UsersServiceClient,
 } from '@app/common';
 import {
+  catchError,
   forkJoin,
   from,
   lastValueFrom,
@@ -35,6 +36,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { RefreshTokenService } from './refresh-token.service';
 import * as process from 'node:process';
+import { RefreshToken } from './db/refresh-token.entity';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -114,7 +116,7 @@ export class AuthService implements OnModuleInit {
           message: 'Успешный вход',
           success: true,
           user: userInfoRequest,
-        } as LoginResponse;
+        };
       }),
     );
   }
@@ -216,15 +218,63 @@ export class AuthService implements OnModuleInit {
     };
   }
 
-  async checkToken({ token }: CheckTokenRequest): Promise<CheckTokenResponse> {
-    const currentToken =
-      await this.refreshTokenService.findRefreshTokenByToken(token);
+  refreshToken({
+    refreshToken,
+  }: RefreshTokenRequest): Observable<RefreshTokenResponse> {
+    return from(
+      this.refreshTokenService.findRefreshTokenByToken(refreshToken),
+    ).pipe(
+      switchMap((refreshTokenResponse: RefreshToken) => {
+        if (refreshToken !== refreshTokenResponse.refreshToken) {
+          throw {
+            accessToken: '',
+            refreshToken: '',
+            message: 'SUCCESS',
+            valid: true,
+          };
+        }
 
-    if (token === currentToken.token) {
-      return { message: 'SUCCESS', valid: true };
-    }
+        return of(refreshTokenResponse);
+      }),
+      switchMap((refreshTokenResponse: RefreshToken) =>
+        this.usersServiceClient.findOneUser({
+          id: refreshTokenResponse.userId,
+        }),
+      ),
+      switchMap(async (user: User) => {
+        const accessToken = await this.generateAccessToken({
+          userId: user.id,
+          email: user.email,
+        });
 
-    return { valid: false, message: 'NOT_FOUNDED' };
+        const refreshToken = this.generateRefreshToken();
+
+        await this.refreshTokenService.saveRefreshToken({
+          user: {
+            id: user.id,
+            email: user.email,
+            password: user.password,
+            username: user.username,
+          },
+          token: refreshToken,
+        });
+
+        return {
+          valid: true,
+          message: 'SUCCESS',
+          accessToken,
+          refreshToken,
+        } as RefreshTokenResponse;
+      }),
+      catchError((error: Error) => {
+        return of({
+          accessToken: '',
+          refreshToken: '',
+          message: error.message,
+          valid: false,
+        });
+      }),
+    );
   }
 
   changePassword({

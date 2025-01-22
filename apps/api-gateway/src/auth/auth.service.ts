@@ -10,12 +10,11 @@ import {
   AuthServiceClient,
   ChangePasswordRequest,
   ChangePasswordResponse,
-  CheckTokenRequest,
-  CheckTokenResponse,
   LoginRequest,
   LoginResponse,
   LogoutRequest,
   LogoutResponse,
+  RefreshTokenRequest,
   RegisterRequest,
   RegisterResponse,
   UserInfoRequest,
@@ -51,12 +50,8 @@ export class AuthService implements OnModuleInit {
     return this.authServiceClient.register(request, metadata);
   }
 
-  checkToken(
-    request: CheckTokenRequest,
-    req: Request,
-  ): Observable<CheckTokenResponse> {
+  refreshToken(req: Request): Observable<RefreshTokenRequest> {
     const refreshToken = req?.cookies.refreshToken;
-    console.log(refreshToken);
     if (!refreshToken) {
       throw new HttpException(
         'Refresh token not provided',
@@ -65,7 +60,10 @@ export class AuthService implements OnModuleInit {
     }
     const metadata = new Metadata();
     metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
-    return this.authServiceClient.checkToken({ token: refreshToken }, metadata);
+    return this.authServiceClient.refreshToken(
+      { refreshToken: refreshToken },
+      metadata,
+    );
   }
 
   logout(request: LogoutRequest): Observable<LogoutResponse> {

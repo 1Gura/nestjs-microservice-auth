@@ -19,7 +19,7 @@ export class RefreshTokenService {
 
     const refreshToken = this.refreshTokenRepository.create({
       userId: user.id,
-      token,
+      refreshToken: token,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 дней жизни токена
     });
 
@@ -28,7 +28,7 @@ export class RefreshTokenService {
 
   async findRefreshTokenByToken(token: string): Promise<RefreshToken | null> {
     return await this.refreshTokenRepository.findOne({
-      where: { token },
+      where: { refreshToken: token },
     });
   }
 
