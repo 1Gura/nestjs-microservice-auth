@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from '@app/common';
-import { catchError, throwError } from 'rxjs';
+import { CreateUserDto, UpdateUserDto, User, Users } from '@app/common';
+import { catchError, Observable, throwError } from 'rxjs';
 import { AuthGuard } from '@app/common/guards/auth-guard';
 
 @Controller('users')
@@ -19,8 +19,21 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @UseGuards(AuthGuard)
   @Get()
-  findAll() {
+  findAll(): Observable<Users> {
     return this.usersService.findAll();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  findUserById(@Param('id') id: string): Observable<User> {
+    return this.usersService.findOneById(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get(':email')
+  findUserByEmail(@Param('email') email: string): Observable<User> {
+    console.log('EMAIl');
+    return this.usersService.findOneByEmail(email);
   }
 
   @Post('create')
@@ -43,7 +56,7 @@ export class UsersController {
 
   @Post('login')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.findOneById(id);
   }
 
   @Patch(':id')

@@ -27,8 +27,12 @@ export class UsersService implements OnModuleInit {
     return this.usersServiceClient.findAllUsers({});
   }
 
-  findOne(id: string) {
+  findOneById(id: string) {
     return this.usersServiceClient.findOneUser({ id });
+  }
+
+  findOneByEmail(email: string) {
+    return this.usersServiceClient.findOneUser({ email });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
