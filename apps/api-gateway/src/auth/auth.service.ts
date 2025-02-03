@@ -50,6 +50,12 @@ export class AuthService implements OnModuleInit {
     return this.authServiceClient.register(request, metadata);
   }
 
+  getUserInfoByAccessToken(request: LoginRequest): Observable<LoginResponse> {
+    const metadata = new Metadata();
+    metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
+    return this.authServiceClient.login(request, metadata);
+  }
+
   refreshToken(req: Request): Observable<RefreshTokenRequest> {
     const refreshToken = req?.cookies.refreshToken;
     if (!refreshToken) {

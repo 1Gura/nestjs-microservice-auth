@@ -20,6 +20,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 import { CookieInterceptor } from '@app/common/interceptors/сookie-interceptor';
 import { Request } from 'express';
 import { AuthGuard } from '@app/common/guards/auth-guard';
+import { JwtAuthGuard } from './guards/jwt-auth-guard';
 
 @Controller('auth')
 @UseInterceptors(CookieInterceptor)
@@ -68,6 +69,16 @@ export class AuthController {
   checkAuth(): { isAuthenticated: boolean } {
     // Если токен валиден, пользователь считается авторизованным
     return { isAuthenticated: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getCurrentUser(
+    @Req() req: { user: { userId: string; email: string } },
+  ) {
+    const { userId, email } = req.user; // Получаем ID пользователя из декодированного токена
+
+    return { userId, email };
   }
 
   @Post('/refresh-token')
