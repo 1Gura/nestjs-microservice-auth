@@ -15,7 +15,7 @@ message LoginResponse {
   string refresh_token = 2;  // Рефреш-токен для обновления доступа
   bool success = 3;  // Успешность логина
   string message = 4;  // Сообщение об ошибке или успехе
-  UserInfoRequest user = 5;
+  UserInfoResponse user = 5;
 }
 
 // Сообщение для регистрации нового пользователя
@@ -31,7 +31,7 @@ message RegisterResponse {
   string message = 2;   // Сообщение об ошибке или успехе
   string access_token = 3; // токен
   string refresh_token = 4;  // Рефреш-токен для обновления доступа
-  UserInfoRequest user = 5;
+  UserInfoResponse user = 5;
 }
 
 // Сообщение для рефреша токена
@@ -83,6 +83,7 @@ message UserInfoResponse {
   string username = 1;  // Имя пользователя
   string email = 2;     // Электронная почта
   string created_at = 3; // Дата создания аккаунта
+  string id = 4;
 }
 
 // Сервис аутентификации и авторизации

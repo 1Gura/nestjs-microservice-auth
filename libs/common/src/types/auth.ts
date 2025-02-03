@@ -5,8 +5,8 @@
 // source: auth.proto
 
 /* eslint-disable */
-import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
-import { Observable } from "rxjs";
+import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 
 export const protobufPackage = "auth";
@@ -30,7 +30,7 @@ export interface LoginResponse {
   success: boolean;
   /** Сообщение об ошибке или успехе */
   message: string;
-  user: UserInfoRequest | undefined;
+  user: UserInfoResponse | undefined;
 }
 
 /** Сообщение для регистрации нового пользователя */
@@ -53,7 +53,7 @@ export interface RegisterResponse {
   accessToken: string;
   /** Рефреш-токен для обновления доступа */
   refreshToken: string;
-  user: UserInfoRequest | undefined;
+  user: UserInfoResponse | undefined;
 }
 
 /** Сообщение для рефреша токена */
@@ -122,6 +122,7 @@ export interface UserInfoResponse {
   email: string;
   /** Дата создания аккаунта */
   createdAt: string;
+  id: string;
 }
 
 export const AUTH_PACKAGE_NAME = "auth";
@@ -131,27 +132,27 @@ export const AUTH_PACKAGE_NAME = "auth";
 export interface AuthServiceClient {
   /** Метод для логина */
 
-  login(request: LoginRequest, metadata: Metadata): Observable<LoginResponse>;
+  login(request: LoginRequest, metadata?: Metadata): Observable<LoginResponse>;
 
   /** Метод для регистрации */
 
-  register(request: RegisterRequest, metadata: Metadata): Observable<RegisterResponse>;
+  register(request: RegisterRequest, metadata?: Metadata): Observable<RegisterResponse>;
 
   /** Метод для рефреша access токена и обновления рефреш токена */
 
-  refreshToken(request: RefreshTokenRequest, metadata: Metadata): Observable<RefreshTokenResponse>;
+  refreshToken(request: RefreshTokenRequest, metadata?: Metadata): Observable<RefreshTokenResponse>;
 
   /** Метод для выхода из системы */
 
-  logout(request: LogoutRequest): Observable<LogoutResponse>;
+  logout(request: LogoutRequest, metadata?: Metadata): Observable<LogoutResponse>;
 
   /** Метод для изменения пароля */
 
-  changePassword(request: ChangePasswordRequest): Observable<ChangePasswordResponse>;
+  changePassword(request: ChangePasswordRequest, metadata?: Metadata): Observable<ChangePasswordResponse>;
 
   /** Метод для получения информации о пользователе */
 
-  userInfo(request: UserInfoRequest): Observable<UserInfoResponse>;
+  userInfo(request: UserInfoRequest, metadata?: Metadata): Observable<UserInfoResponse>;
 }
 
 /** Сервис аутентификации и авторизации */

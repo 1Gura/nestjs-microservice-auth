@@ -37,6 +37,7 @@ import * as crypto from 'crypto';
 import { RefreshTokenService } from './refresh-token.service';
 import * as process from 'node:process';
 import { RefreshToken } from './db/refresh-token.entity';
+import { getCurrentDateTime } from '../../../libs/helpers/get-current-date-time';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -103,11 +104,12 @@ export class AuthService implements OnModuleInit {
           token: refreshToken,
         });
 
-        const userInfoRequest = {
+        const userInfoResponse: UserInfoResponse = {
           id: user.id,
           email: user.email,
           username: user.username,
-        } as UserInfoRequest;
+          createdAt: getCurrentDateTime(),
+        };
 
         // Формируем ответ
         return {
@@ -115,7 +117,7 @@ export class AuthService implements OnModuleInit {
           refreshToken,
           message: 'Успешный вход',
           success: true,
-          user: userInfoRequest,
+          user: userInfoResponse,
         };
       }),
     );
@@ -289,13 +291,14 @@ export class AuthService implements OnModuleInit {
     return { message: 'PASSWORDS_INCORRECT', success: true };
   }
 
-  userInfo({ username }: UserInfoRequest): UserInfoResponse {
+  userInfo({ username, id }: UserInfoRequest): UserInfoResponse {
     if (username) {
       const currentDate = new Date();
       return {
         username,
         email: 'user@mail.com',
         createdAt: currentDate.toString(),
+        id,
       };
     }
 
