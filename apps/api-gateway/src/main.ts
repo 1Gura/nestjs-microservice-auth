@@ -7,7 +7,7 @@ async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:4200', // Адрес клиента (можно указать массив адресов)
+    origin: /localhost:.*/, // Разрешаем все локальные порты
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Accept, Authorization',
     credentials: true, // Если нужны cookie

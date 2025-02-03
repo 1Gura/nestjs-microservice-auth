@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   LoginRequest,
+  LoginResponse,
   LogoutRequest,
   LogoutResponse,
   RegisterRequest,
@@ -45,7 +46,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  login(@Body() request: LoginRequest): Observable<RegisterResponse> {
+  login(@Body() request: LoginRequest): Observable<LoginResponse> {
     return this.authService.login(request).pipe(
       catchError((error) => {
         if (error.details) {
@@ -74,11 +75,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getCurrentUser(
-    @Req() req: { user: { userId: string; email: string } },
+    @Req() req: { user: { userId: string; email: string; userName: string } },
   ) {
-    const { userId, email } = req.user; // Получаем ID пользователя из декодированного токена
-
-    return { userId, email };
+    return req.user;
   }
 
   @Post('/refresh-token')

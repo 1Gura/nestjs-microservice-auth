@@ -18,9 +18,10 @@ export class CookieInterceptor implements NestInterceptor {
       map((data) => {
         if (data?.refreshToken) {
           response.cookie('refreshToken', data.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            httpOnly: false,
+            // secure: process.env.NODE_ENV === 'production',
+            secure: false,
+            sameSite: 'None', // Для запросов между разными доменами, если необходимо
             maxAge: 7 * 24 * 60 * 60 * 1000,
           });
 

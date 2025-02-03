@@ -90,6 +90,7 @@ export class AuthService implements OnModuleInit {
         const accessToken = await this.generateAccessToken({
           userId: payload.id,
           email: user.email,
+          username: user.username,
         });
 
         const refreshToken = this.generateRefreshToken();
@@ -169,7 +170,11 @@ export class AuthService implements OnModuleInit {
 
           return forkJoin([
             from(
-              this.generateAccessToken({ userId: newUser.id, email: email }),
+              this.generateAccessToken({
+                userId: newUser.id,
+                email: email,
+                username: newUser.username,
+              }),
             ),
             of(this.generateRefreshToken()),
           ]);
@@ -247,6 +252,7 @@ export class AuthService implements OnModuleInit {
         const accessToken = await this.generateAccessToken({
           userId: user.id,
           email: user.email,
+          username: user.username,
         });
 
         const refreshToken = this.generateRefreshToken();
@@ -309,6 +315,7 @@ export class AuthService implements OnModuleInit {
   private generateAccessToken(payload: {
     userId: string;
     email: string;
+    username: string;
   }): Promise<string> {
     return this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET,
