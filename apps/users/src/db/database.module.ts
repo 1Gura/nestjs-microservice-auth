@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities';
+import { File, Post, Tag, User } from './entities';
 
 @Module({
   imports: [
@@ -11,10 +11,10 @@ import { User } from './entities';
       username: 'user_user',
       password: 'user_password',
       database: 'user_db',
-      entities: [User], // Укажите сущности
+      entities: [User, Post, Tag, File], // Укажите сущности
       synchronize: true, // Выключить в продакшене!
     }),
-    TypeOrmModule.forFeature([User]), // Подключите сущности
+    TypeOrmModule.forFeature([User, Post, Tag, File]), // Подключите сущности
   ],
   exports: [TypeOrmModule],
 })

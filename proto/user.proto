@@ -8,6 +8,13 @@ service UsersService {
   rpc FindOneUser (FindOneUserDto) returns (User) {}
   rpc UpdateUser (UpdateUserDto) returns (User) {}
   rpc RemoveUser (FindOneUserDto) returns (User) {}
+
+  // Добавляем новые методы для постов
+  rpc CreatePost (CreatePostRequest) returns (PostResponse);
+  rpc GetPost (GetPostRequest) returns (PostResponse);
+  rpc ListPosts (ListPostsRequest) returns (ListPostsResponse);
+  rpc UpdatePost (UpdatePostRequest) returns (PostResponse);
+  rpc DeletePost (DeletePostRequest) returns (Empty);
 }
 
 message Empty {};
@@ -46,4 +53,68 @@ message User {
 message SocialMedia {
   optional string twitterUri = 1;
   optional string fbUri = 2;
+}
+
+//POSTS
+
+message PostResponse {
+  string id = 1;
+  string caption = 2;
+  optional string location = 3;
+  optional string altText = 4;
+  repeated Tag tags = 5;
+  repeated File files = 6;
+  string userId = 7;
+}
+
+message CreatePostRequest {
+  string caption = 1;
+  optional string location = 2;
+  optional string altText = 3;
+  repeated string tags = 4;
+  repeated File files = 5;
+  string userId = 6;
+}
+
+message GetPostRequest {
+  string id = 1;
+}
+
+message ListPostsRequest {
+  optional string userId = 1;
+  repeated string tags = 2;
+  optional string location = 3;
+}
+
+message ListPostsResponse {
+  repeated PostResponse posts = 1;
+}
+
+message UpdatePostRequest {
+  string id = 1;
+  string caption = 2;
+  optional string location = 3;
+  optional string altText = 4;
+  repeated Tag tags = 5;  // Массив тегов (необязательное поле)
+  repeated File files = 6;
+  string userId = 7;
+}
+
+message DeletePostRequest {
+  string id = 1;
+}
+
+// TAGS
+message Tag {
+  string id = 1;
+  string name = 2;
+}
+
+// FILES
+// Описание файла (метаданные)
+message File {
+  string filename = 1;  // Имя файла
+  string mimeType = 2;   // Тип файла (например, image/jpeg)
+  bytes fileData = 3;    // Бинарные данные файла (Blob)
+  int64 fileSize = 4;    // Размер файла в байтах
 }

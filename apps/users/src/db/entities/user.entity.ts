@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from './post.entity';
 
 @Entity('users')
 export class User {
@@ -13,4 +14,8 @@ export class User {
 
   @Column()
   password: string; // Захэшированный пароль
+
+  // Добавляем связь один ко многим
+  @OneToMany(() => Post, (post) => post.user, { cascade: true })
+  posts: Post[];
 }

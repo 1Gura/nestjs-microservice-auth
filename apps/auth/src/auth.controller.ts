@@ -47,6 +47,7 @@ export class AuthController implements AuthServiceController {
   logout(
     request: LogoutRequest,
   ): Promise<LogoutResponse> | Observable<LogoutResponse> | LogoutResponse {
+    console.log(request);
     return this.authService.logout(request);
   }
   changePassword(

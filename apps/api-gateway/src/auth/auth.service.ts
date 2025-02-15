@@ -73,7 +73,9 @@ export class AuthService implements OnModuleInit {
   }
 
   logout(request: LogoutRequest): Observable<LogoutResponse> {
-    return this.authServiceClient.logout(request);
+    const metadata = new Metadata();
+    metadata.add('x-api-gateway', process.env.SECRET_HEADER); // Добавляем заголовок
+    return this.authServiceClient.logout(request, metadata);
   }
 
   changePassword(

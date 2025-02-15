@@ -42,7 +42,7 @@ import { getCurrentDateTime } from '../../../libs/helpers/get-current-date-time'
 @Injectable()
 export class AuthService implements OnModuleInit {
   private usersServiceClient: UsersServiceClient;
-  private readonly ACCESS_TOKEN_EXPIRY = '15m';
+  private readonly ACCESS_TOKEN_EXPIRY = '1h';
 
   constructor(
     @Inject(USER_SERVICE) private readonly client: ClientGrpc,
@@ -217,6 +217,7 @@ export class AuthService implements OnModuleInit {
 
   async logout({ token }: LogoutRequest): Promise<LogoutResponse> {
     // Удаляем токен
+    console.log(token);
     await this.refreshTokenService.deleteRefreshToken(token);
 
     return {

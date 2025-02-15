@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateUserDto,
   FindOneUserDto,
@@ -12,15 +12,15 @@ import * as Entities from './db/entities/index';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
-export class UsersService implements OnModuleInit {
+export class UsersService {
   private readonly users: User[] = [];
 
   constructor(
     @InjectRepository(Entities.User)
     private readonly userRepository: Repository<Entities.User>,
+    @InjectRepository(Entities.Post)
+    private readonly postRepository: Repository<Entities.Post>,
   ) {}
-
-  onModuleInit() {}
 
   async findByEmail(email: string): Promise<Entities.User | null> {
     return await this.userRepository.findOne({ where: { email } });
