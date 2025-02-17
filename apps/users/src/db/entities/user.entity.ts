@@ -15,7 +15,6 @@ export class User {
   @Column()
   password: string; // Захэшированный пароль
 
-  // Добавляем связь один ко многим
-  @OneToMany(() => Post, (post) => post.user, { cascade: true })
-  posts: Post[];
+  @OneToMany(() => Post, (post) => post.user, { nullable: true }) // Делаем связь необязательной
+  posts?: Post[];
 }
