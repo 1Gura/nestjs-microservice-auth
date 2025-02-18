@@ -16,16 +16,30 @@ export class PostService {
     private readonly userRepository: Repository<Entities.User>,
     @InjectRepository(Entities.Post)
     private readonly postRepository: Repository<Entities.Post>,
+    @InjectRepository(Entities.Tag)
+    private readonly tagRepository: Repository<Entities.Tag>,
   ) {}
 
   // Логика для постов
   async createPost(data: CreatePostRequest): Promise<PostResponse> {
+    console.log(data);
     const user = await this.userRepository.findOne({
       where: { id: data.userId },
     });
+
     if (!user) throw new Error('User not found');
 
-    const post = this.postRepository.create({});
+    const allTags = await this.getAllTags(data.tags);
+
+    const post = this.postRepository.create({
+      caption: data.caption,
+      userId: data.userId,
+      altText: data.altText,
+      location: data.location,
+      tags: allTags,
+      files: data.files,
+      user,
+    });
 
     const createdPost = await this.postRepository.save(post);
 
@@ -60,12 +74,16 @@ export class PostService {
   async listPosts(filters: ListPostsRequest): Promise<PostResponse[]> {
     const query = this.postRepository.createQueryBuilder('post');
 
+    console.log(filters);
+
     if (filters.userId) {
       query.andWhere('post.userId = :userId', { userId: filters.userId });
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      query.andWhere('post.tags && ARRAY[:...tags]', { tags: filters.tags });
+      query
+        .innerJoin('post.tags', 'tag') // Присоединяем таблицу tags
+        .andWhere('tag.name IN (:...tags)', { tags: filters.tags }); // Фильтр по именам тегов
     }
 
     if (filters.location) {
@@ -97,5 +115,28 @@ export class PostService {
 
   async deletePost(id: string): Promise<void> {
     await this.postRepository.delete(id);
+  }
+
+  private async getAllTags(tags: string[]): Promise<Entities.Tag[]> {
+    // Проверяем, какие теги уже существуют в базе
+    const existingTags = await this.tagRepository.find({
+      where: tags.map((tag) => ({ name: tag })),
+    });
+
+    // Получаем список имен уже существующих тегов
+    const existingTagNames = existingTags.map((tag) => tag.name);
+
+    // Фильтруем новые теги, которых нет в базе
+    const newTagNames = tags.filter((tag) => !existingTagNames.includes(tag));
+
+    // Создаём новые теги, если есть
+    const newTags = this.tagRepository.create(
+      newTagNames.map((name) => ({ name })),
+    );
+
+    await this.tagRepository.save(newTags);
+
+    // Объединяем существующие и новые теги
+    return [...existingTags, ...newTags];
   }
 }

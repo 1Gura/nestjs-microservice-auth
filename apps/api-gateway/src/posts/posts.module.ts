@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { POST_SERVICE } from '../constants';
+import { USER_SERVICE } from '../constants';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 
@@ -10,7 +10,7 @@ import { join } from 'path';
   imports: [
     ClientsModule.register([
       {
-        name: POST_SERVICE,
+        name: USER_SERVICE,
         transport: Transport.GRPC,
         options: {
           package: USER_PACKAGE_NAME,

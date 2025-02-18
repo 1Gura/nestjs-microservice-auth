@@ -16,30 +16,30 @@ import {
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postService: PostsService) {}
+  constructor(private readonly postsService: PostsService) {}
 
   @Post()
   create(@Body() data: CreatePostRequest) {
-    return this.postService.create(data);
+    return this.postsService.create(data);
   }
 
-  @Get()
-  findAll(request: ListPostsRequest) {
-    return this.postService.findAll(request);
+  @Post('get-list')
+  findAll(@Body() request: ListPostsRequest) {
+    return this.postsService.findAll(request);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.findOne({ id });
+    return this.postsService.findOne({ id });
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() request: UpdatePostRequest) {
-    return this.postService.update(request);
+    return this.postsService.update(request);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.postService.remove({ id });
+    return this.postsService.remove({ id });
   }
 }
