@@ -5,6 +5,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICE } from '../constants';
 import { USER_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
+import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -21,6 +23,6 @@ import { join } from 'path';
     ]),
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, JwtService, Reflector],
 })
 export class PostsModule {}

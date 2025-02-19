@@ -1,8 +1,8 @@
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
   UnauthorizedException,
 } from '@nestjs/common';
 import { catchError, from, Observable, of, switchMap, take } from 'rxjs';
@@ -25,7 +25,6 @@ export class TokenInterceptor implements NestInterceptor {
     const token = authHeader.split(' ')[1];
     return this.validateToken(token).pipe(
       switchMap((tokenIsValid) => {
-        console.log(tokenIsValid);
         if (tokenIsValid) {
           return next.handle();
         }
