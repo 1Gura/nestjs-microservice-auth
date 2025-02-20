@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import * as cookieParser from 'cookie-parser';
+import * as path from 'node:path';
+import * as express from 'express';
 
 async function bootstrap() {
   dotenv.config();
@@ -14,6 +16,10 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+  // 🔹 Раздача файлов из "uploads"
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

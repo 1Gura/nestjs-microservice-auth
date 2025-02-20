@@ -8,7 +8,7 @@
 import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
-export const protobufPackageUser = "user";
+export const protobufUserPackage = "user";
 
 export interface Empty {
 }
@@ -55,7 +55,7 @@ export interface PostResponse {
   location?: string | undefined;
   altText?: string | undefined;
   tags: Tag[];
-  files: File[];
+  files: FileResponse[];
   userId: string;
 }
 
@@ -64,7 +64,7 @@ export interface CreatePostRequest {
   location?: string | undefined;
   altText?: string | undefined;
   tags: string[];
-  files: File[];
+  files: FileResponse[];
   userId: string;
 }
 
@@ -91,7 +91,7 @@ export interface UpdatePostRequest {
     | undefined;
   /** Массив тегов (необязательное поле) */
   tags: Tag[];
-  files: File[];
+  files: FileResponse[];
   userId: string;
 }
 
@@ -107,15 +107,25 @@ export interface Tag {
 
 /**
  * FILES
- * Описание файла (метаданные)
+ * Описание при создании файла (метаданные)
  */
-export interface File {
+export interface FileRequest {
   /** Имя файла */
   filename: string;
   /** Тип файла (например, image/jpeg) */
   mimeType: string;
   /** Бинарные данные файла (Blob) */
   fileData: Uint8Array;
+  /** Размер файла в байтах */
+  fileSize: number;
+}
+
+export interface FileResponse {
+  /** Имя файла */
+  filename: string;
+  /** Тип файла (например, image/jpeg) */
+  mimeType: string;
+  fileUrl: string;
   /** Размер файла в байтах */
   fileSize: number;
 }

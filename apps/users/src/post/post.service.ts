@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   CreatePostRequest,
+  FileRequest,
   ListPostsRequest,
   PostResponse,
   UpdatePostRequest,
@@ -8,6 +9,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Entities from '../db/entities';
 import { Repository } from 'typeorm';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PostService {
@@ -18,11 +22,12 @@ export class PostService {
     private readonly postRepository: Repository<Entities.Post>,
     @InjectRepository(Entities.Tag)
     private readonly tagRepository: Repository<Entities.Tag>,
+    @InjectRepository(Entities.File)
+    private readonly fileRepository: Repository<Entities.File>,
   ) {}
 
   // Логика для постов
   async createPost(data: CreatePostRequest): Promise<PostResponse> {
-    console.log(data);
     const user = await this.userRepository.findOne({
       where: { id: data.userId },
     });
@@ -45,7 +50,7 @@ export class PostService {
 
     return {
       id: createdPost.id,
-      files: [],
+      files: createdPost.files,
       tags: createdPost.tags,
       altText: createdPost.altText,
       userId: createdPost.userId,
@@ -138,5 +143,41 @@ export class PostService {
 
     // Объединяем существующие и новые теги
     return [...existingTags, ...newTags];
+  }
+
+  private async saveFilesLocallyAndStoreMetadata(
+    files: FileRequest[],
+  ): Promise<Entities.File[]> {
+    if (!files || files.length === 0) return [];
+
+    const uploadDir = path.join(__dirname, '..', '..', 'uploads');
+
+    // 🔹 Проверяем, существует ли папка, если нет — создаём
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const savedFiles: Entities.File[] = [];
+
+    for (const fileData of files) {
+      const fileExtension = path.extname(fileData.filename); // Расширение файла
+      const fileName = `${uuidv4()}${fileExtension}`; // Уникальное имя
+      const filePath = path.join(uploadDir, fileName);
+
+      // 🔹 Записываем файл в файловую систему
+      fs.writeFileSync(filePath, fileData.fileData);
+
+      // 🔹 Создаём запись о файле в БД
+      const fileEntity = this.fileRepository.create({
+        filename: fileName,
+        mimeType: fileData.mimeType,
+        fileSize: fileData.fileSize,
+        fileUrl: `/uploads/${fileName}`,
+      });
+
+      savedFiles.push(await this.fileRepository.save(fileEntity));
+    }
+
+    return savedFiles;
   }
 }

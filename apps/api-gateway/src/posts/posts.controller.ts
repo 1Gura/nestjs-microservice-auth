@@ -20,6 +20,7 @@ export class PostsController {
 
   @Post()
   create(@Body() data: CreatePostRequest) {
+    console.log('FORMDATA', data);
     return this.postsService.create(data);
   }
 

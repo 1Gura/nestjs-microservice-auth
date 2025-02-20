@@ -63,7 +63,7 @@ message PostResponse {
   optional string location = 3;
   optional string altText = 4;
   repeated Tag tags = 5;
-  repeated File files = 6;
+  repeated FileResponse files = 6;
   string userId = 7;
 }
 
@@ -72,7 +72,7 @@ message CreatePostRequest {
   optional string location = 2;
   optional string altText = 3;
   repeated string tags = 4;
-  repeated File files = 5;
+  repeated FileResponse files = 5;
   string userId = 6;
 }
 
@@ -96,7 +96,7 @@ message UpdatePostRequest {
   optional string location = 3;
   optional string altText = 4;
   repeated Tag tags = 5;  // Массив тегов (необязательное поле)
-  repeated File files = 6;
+  repeated FileResponse files = 6;
   string userId = 7;
 }
 
@@ -111,10 +111,17 @@ message Tag {
 }
 
 // FILES
-// Описание файла (метаданные)
-message File {
+// Описание при создании файла (метаданные)
+message FileRequest {
   string filename = 1;  // Имя файла
   string mimeType = 2;   // Тип файла (например, image/jpeg)
   bytes fileData = 3;    // Бинарные данные файла (Blob)
+  int64 fileSize = 4;    // Размер файла в байтах
+}
+
+message FileResponse {
+  string filename = 1;  // Имя файла
+  string mimeType = 2;   // Тип файла (например, image/jpeg)
+  string fileUrl = 3;
   int64 fileSize = 4;    // Размер файла в байтах
 }
